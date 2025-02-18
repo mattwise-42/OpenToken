@@ -11,6 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import org.apache.commons.codec.language.Soundex;
 import org.apache.commons.lang3.time.DateUtils;
 
 import lombok.AllArgsConstructor;
@@ -124,6 +125,8 @@ public final class AttributeExpression {
                 return M(value, expression, args);
             case 'D':
                 return D(value, expression);
+            case 'A':
+                return A(value);
             default:
                 throw evalError(value, expression, null);
         }
@@ -205,4 +208,15 @@ public final class AttributeExpression {
         }
     }
 
+    /**
+     * Encodes value using Soundex algorithm to match strings that sound alike but
+     * are spelled differently.
+     * 
+     * @param value the value to encode
+     * @return the Soundex encoded value
+     */
+    private static String A(String value) {
+        Soundex soundex = new Soundex();
+        return soundex.encode(value);
+    }
 }
