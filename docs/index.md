@@ -15,11 +15,22 @@ Welcome to the OpenToken documentation! OpenToken is a dual-implementation (Java
 
 ## What is OpenToken?
 
-OpenToken enables privacy-preserving person matching by generating cryptographically secure tokens from deterministic person attributes (name, birthdate, SSN, etc.). The library supports:
+OpenToken enables privacy-preserving person matching by generating cryptographically secure tokens from deterministic person attributes (name, birthdate, SSN, etc.).
 
-- **Multi-language Support** - Identical implementations in Java and Python
-- **Cryptographically Secure** - AES-256 encryption prevents re-identification
-- **Deterministic Matching** - Compare 5 unique tokens for high-confidence matches
+<div class="feature-grid">
+  <div class="feature-card">
+    <h3>🌐 Multi-language Support</h3>
+    <p>Identical implementations in Java and Python produce byte-identical tokens for the same normalized input values.</p>
+  </div>
+  <div class="feature-card">
+    <h3>🔒 Cryptographically Secure</h3>
+    <p>AES-256 encryption with HMAC-SHA256 prevents re-identification while enabling deterministic matching.</p>
+  </div>
+  <div class="feature-card">
+    <h3>✓ Deterministic Matching</h3>
+    <p>Compare 5 unique tokens (T1-T5) for high-confidence person matching across datasets.</p>
+  </div>
+</div>
 
 ## Key Features
 
