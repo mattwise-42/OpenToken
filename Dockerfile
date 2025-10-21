@@ -17,7 +17,7 @@ RUN mvn clean package
 ##################################################
 # Stage 2: Create the image to run the application
 ##################################################
-FROM amazoncorretto:11-alpine AS final
+FROM amazoncorretto:25-alpine AS final
 
 RUN mkdir /app
 
