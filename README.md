@@ -228,6 +228,42 @@ PYTHONPATH=src/main python src/main/opentoken/main.py \
   -h "HashingKey" -e "Secret-Encryption-Key-Goes-Here."
 ```
 
+### PySpark  <!-- omit in toc -->
+
+For distributed token generation using PySpark:
+
+```shell
+cd lib/python
+pip install -e .
+cd ../python-pyspark
+pip install -e .
+```
+
+Then in your Python/PySpark code:
+
+```python
+from pyspark.sql import SparkSession
+from opentoken_pyspark import OpenTokenProcessor
+
+# Create Spark session
+spark = SparkSession.builder.appName("OpenToken").getOrCreate()
+
+# Load your data
+df = spark.read.csv("data.csv", header=True)
+
+# Initialize processor with secrets
+processor = OpenTokenProcessor(
+    hashing_secret="HashingKey",
+    encryption_key="Secret-Encryption-Key-Goes-Here."
+)
+
+# Generate tokens
+tokens_df = processor.process_dataframe(df)
+tokens_df.show()
+```
+
+See the [PySpark Bridge README](lib/python-pyspark/README.md) and [example notebook](lib/python-pyspark/notebooks/OpenToken_PySpark_Example.ipynb) for more details.
+
 ## Development & Documentation
 
 Central reference: [Development Guide](docs/dev-guide-development.md) (setup, build, testing, versioning, dev container, registration, contribution checklist).
@@ -243,11 +279,12 @@ Quick parity note: Java and Python implementations produce identical tokens for 
 
 ```
 lib/
-├── java/        # Java implementation (Maven)
-├── python/      # Python implementation (pip)
-tools/           # Utility scripts and tools
-docs/            # Documentation
-.devcontainer/   # Development container configuration
+├── java/           # Java implementation (Maven)
+├── python/         # Python implementation (pip)
+├── python-pyspark/ # PySpark bridge for distributed token generation
+tools/              # Utility scripts and tools
+docs/               # Documentation
+.devcontainer/      # Development container configuration
 ```
 
 ### Development Environment  <!-- omit in toc -->
