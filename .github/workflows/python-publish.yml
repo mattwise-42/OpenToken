@@ -1,0 +1,83 @@
+name: Python Package Publish
+
+on:
+  release:
+    types: [created, published, released]
+
+jobs:
+  publish-opentoken:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+    
+    - name: Build opentoken package
+      run: |
+        cd lib/python
+        python -m build
+    
+    - name: Publish opentoken to GitHub Packages
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        TWINE_REPOSITORY_URL: https://upload.pypi.org/legacy/
+      run: |
+        cd lib/python
+        # For GitHub Packages, use this instead:
+        # python -m twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
+        echo "Package built successfully. Configure PyPI token to publish."
+        ls -la dist/
+
+  publish-opentoken-pyspark:
+    runs-on: ubuntu-latest
+    needs: publish-opentoken
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+    
+    - name: Install opentoken core (required for pyspark package)
+      run: |
+        pip install -e lib/python/
+    
+    - name: Build opentoken-pyspark package
+      run: |
+        cd lib/python-pyspark
+        python -m build
+    
+    - name: Publish opentoken-pyspark to GitHub Packages
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        TWINE_REPOSITORY_URL: https://upload.pypi.org/legacy/
+      run: |
+        cd lib/python-pyspark
+        # For GitHub Packages, use this instead:
+        # python -m twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
+        echo "Package built successfully. Configure PyPI token to publish."
+        ls -la dist/
