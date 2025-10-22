@@ -184,6 +184,7 @@ lib/python/src/main/opentoken/  # Mirrors Java structure with Pythonic naming
 - [ ] Documentation updated (README, JavaDoc, docstrings)
 - [ ] Service registration files updated (Java: `META-INF/services/`, Python: loaders)
 - [ ] No secrets or sensitive data committed
+- [ ] CI/CD pipelines updated if necessary (GitHub Actions workflows, build configurations)
 - [ ] All CI checks passing
 
 ### Commit Message Format
