@@ -16,13 +16,7 @@ The OpenToken PySpark Bridge provides a seamless interface between PySpark DataF
 
 ## Installation
 
-### Prerequisites
-
-- Python 3.10 or higher
-- PySpark 3.0.0 or higher
-- OpenToken core library
-
-### Install from Source
+### Quick Install
 
 ```bash
 # First, install the OpenToken core library
@@ -34,14 +28,14 @@ cd ../python-pyspark
 pip install -e .
 ```
 
-### Development Installation
+For detailed installation instructions, troubleshooting, and alternative installation methods, see [INSTALL.md](INSTALL.md).
 
-For development with testing and Jupyter support:
+### Prerequisites
 
-```bash
-cd lib/python-pyspark
-pip install -e ".[dev]"
-```
+- Python 3.10 or higher
+- PySpark 3.0.0 or higher
+- OpenToken core library
+- Java 8 or higher (required by PySpark)
 
 ## Quick Start
 

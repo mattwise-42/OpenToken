@@ -74,24 +74,24 @@ class TestOpenTokenProcessor:
     def test_process_dataframe_with_valid_data(self, spark, sample_data):
         """Test processing a DataFrame with valid data."""
         processor = OpenTokenProcessor("HashingKey", "Secret-Encryption-Key-Goes-Here.")
-        
+
         # Create DataFrame
         df = spark.createDataFrame(sample_data)
-        
+
         # Process the DataFrame
         result_df = processor.process_dataframe(df)
-        
+
         # Verify result structure
         assert "RecordId" in result_df.columns
         assert "RuleId" in result_df.columns
         assert "Token" in result_df.columns
-        
+
         # Collect results
         results = result_df.collect()
-        
+
         # Should have tokens for each record (5 tokens per record)
         assert len(results) > 0
-        
+
         # Verify we have multiple rule IDs
         rule_ids = set(row.RuleId for row in results)
         assert len(rule_ids) > 1
@@ -99,7 +99,7 @@ class TestOpenTokenProcessor:
     def test_process_dataframe_with_alternative_column_names(self, spark):
         """Test processing with alternative column names."""
         processor = OpenTokenProcessor("HashingKey", "Secret-Encryption-Key-Goes-Here.")
-        
+
         # Create DataFrame with alternative column names
         data = [{
             "Id": "test-123",
@@ -110,19 +110,19 @@ class TestOpenTokenProcessor:
             "DateOfBirth": "2000-01-01",
             "NationalIdentificationNumber": "123-45-6789"
         }]
-        
+
         df = spark.createDataFrame(data)
-        
+
         # Process should work with alternative names
         result_df = processor.process_dataframe(df)
-        
+
         # Verify result
         assert result_df.count() > 0
 
     def test_process_dataframe_with_missing_required_column(self, spark):
         """Test that processing fails with missing required columns."""
         processor = OpenTokenProcessor("HashingKey", "Secret-Encryption-Key-Goes-Here.")
-        
+
         # Create DataFrame missing SocialSecurityNumber
         data = [{
             "RecordId": "test-123",
@@ -132,9 +132,9 @@ class TestOpenTokenProcessor:
             "Sex": "Male",
             "BirthDate": "2000-01-01"
         }]
-        
+
         df = spark.createDataFrame(data)
-        
+
         # Should raise ValueError
         with pytest.raises(ValueError, match="Missing required columns"):
             processor.process_dataframe(df)
@@ -142,25 +142,25 @@ class TestOpenTokenProcessor:
     def test_process_dataframe_with_none_dataframe(self):
         """Test that processing fails with None DataFrame."""
         processor = OpenTokenProcessor("HashingKey", "Secret-Encryption-Key-Goes-Here.")
-        
+
         with pytest.raises(ValueError, match="DataFrame cannot be None"):
             processor.process_dataframe(None)
 
     def test_tokens_are_consistent(self, spark, sample_data):
         """Test that the same input produces the same tokens."""
         processor = OpenTokenProcessor("HashingKey", "Secret-Encryption-Key-Goes-Here.")
-        
+
         # Create DataFrame
         df = spark.createDataFrame(sample_data)
-        
+
         # Process twice
         result1 = processor.process_dataframe(df).collect()
         result2 = processor.process_dataframe(df).collect()
-        
+
         # Convert to sets for comparison (order might differ)
         tokens1 = {(r.RecordId, r.RuleId, r.Token) for r in result1}
         tokens2 = {(r.RecordId, r.RuleId, r.Token) for r in result2}
-        
+
         # Should be identical
         assert tokens1 == tokens2
 
@@ -168,25 +168,25 @@ class TestOpenTokenProcessor:
         """Test that different secrets produce different tokens."""
         processor1 = OpenTokenProcessor("HashingKey1", "EncryptionKey1")
         processor2 = OpenTokenProcessor("HashingKey2", "EncryptionKey2")
-        
+
         # Create DataFrame
         df = spark.createDataFrame(sample_data)
-        
+
         # Process with different secrets
         result1 = processor1.process_dataframe(df).collect()
         result2 = processor2.process_dataframe(df).collect()
-        
+
         # Get tokens for the same record and rule
         tokens1 = {(r.RecordId, r.RuleId, r.Token) for r in result1}
         tokens2 = {(r.RecordId, r.RuleId, r.Token) for r in result2}
-        
+
         # Tokens should be different
         assert tokens1 != tokens2
 
     def test_column_mapping(self, spark):
         """Test that column mapping works correctly."""
         processor = OpenTokenProcessor("HashingKey", "Secret-Encryption-Key-Goes-Here.")
-        
+
         # Create DataFrame with various column names
         data = [{
             "RecordId": "test-1",
@@ -197,12 +197,12 @@ class TestOpenTokenProcessor:
             "BirthDate": "2000-01-01",
             "SocialSecurityNumber": "123-45-6789"
         }]
-        
+
         df = spark.createDataFrame(data)
-        
+
         # Get column mapping
         mapping = processor._get_column_mapping(df)
-        
+
         # Verify mapping
         assert mapping["RecordId"] == "RecordId"
         assert mapping["FirstName"] == "FirstName"
@@ -215,7 +215,7 @@ class TestOpenTokenProcessor:
     def test_validation_with_empty_dataframe(self, spark):
         """Test validation with an empty DataFrame."""
         processor = OpenTokenProcessor("HashingKey", "Secret-Encryption-Key-Goes-Here.")
-        
+
         # Create empty DataFrame with correct schema
         schema = StructType([
             StructField("RecordId", StringType(), True),
@@ -226,12 +226,12 @@ class TestOpenTokenProcessor:
             StructField("BirthDate", StringType(), True),
             StructField("SocialSecurityNumber", StringType(), True)
         ])
-        
+
         df = spark.createDataFrame([], schema)
-        
+
         # Should not raise an error during validation
         processor._validate_dataframe(df)
-        
+
         # Process should return empty DataFrame
         result = processor.process_dataframe(df)
         assert result.count() == 0
