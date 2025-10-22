@@ -5,13 +5,15 @@ PySpark token processor for distributed token generation.
 """
 
 import logging
-from typing import Dict
+from typing import Dict, Type
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import pandas_udf, col
 from pyspark.sql.types import StructType, StructField, StringType, ArrayType
 import pandas as pd
 
 # Import OpenToken core functionality
+from opentoken.attributes.attribute import Attribute
+from opentoken.attributes.attribute_loader import AttributeLoader
 from opentoken.attributes.person.first_name_attribute import FirstNameAttribute
 from opentoken.attributes.person.last_name_attribute import LastNameAttribute
 from opentoken.attributes.person.birth_date_attribute import BirthDateAttribute
@@ -38,22 +40,33 @@ class OpenTokenProcessor:
     """
 
     # Standard column mappings (column name -> attribute class)
-    COLUMN_MAPPINGS = {
-        "RecordId": RecordIdAttribute,
-        "Id": RecordIdAttribute,
-        "FirstName": FirstNameAttribute,
-        "GivenName": FirstNameAttribute,
-        "LastName": LastNameAttribute,
-        "Surname": LastNameAttribute,
-        "BirthDate": BirthDateAttribute,
-        "DateOfBirth": BirthDateAttribute,
-        "Sex": SexAttribute,
-        "Gender": SexAttribute,
-        "PostalCode": PostalCodeAttribute,
-        "ZipCode": PostalCodeAttribute,
-        "SocialSecurityNumber": SocialSecurityNumberAttribute,
-        "NationalIdentificationNumber": SocialSecurityNumberAttribute,
-    }
+    # Built dynamically from attribute classes
+    COLUMN_MAPPINGS: Dict[str, Type[Attribute]] = None
+
+    @classmethod
+    def _build_column_mappings(cls) -> Dict[str, Type[Attribute]]:
+        """
+        Build column name to attribute class mappings dynamically from loaded attributes.
+
+        Returns:
+            Dictionary mapping column names to their corresponding attribute classes.
+        """
+        if cls.COLUMN_MAPPINGS is not None:
+            return cls.COLUMN_MAPPINGS
+
+        mappings = {}
+        for attribute in AttributeLoader.load():
+            attribute_class = type(attribute)
+            for alias in attribute.get_aliases():
+                mappings[alias] = attribute_class
+
+        # Add DateOfBirth as an alias for BirthDate for backward compatibility
+        # (documented in README but not in BirthDateAttribute.ALIASES)
+        if "BirthDate" in mappings:
+            mappings["DateOfBirth"] = mappings["BirthDate"]
+
+        cls.COLUMN_MAPPINGS = mappings
+        return mappings
 
     def __init__(self, hashing_secret: str, encryption_key: str):
         """
@@ -73,6 +86,9 @@ class OpenTokenProcessor:
 
         self.hashing_secret = hashing_secret
         self.encryption_key = encryption_key
+
+        # Build column mappings if not already built
+        self._build_column_mappings()
 
         # Validate secrets can initialize transformers
         try:
@@ -223,6 +239,38 @@ class OpenTokenProcessor:
 
         return result_df
 
+    @classmethod
+    def _get_required_attribute_groups(cls) -> Dict[str, list]:
+        """
+        Get required attribute groups with their column name variants.
+
+        Returns:
+            Dictionary mapping attribute names to their column name variants.
+        """
+        # Required attributes for token generation (excluding RecordId which is optional)
+        required_attribute_classes = [
+            FirstNameAttribute,
+            LastNameAttribute,
+            BirthDateAttribute,
+            SexAttribute,
+            PostalCodeAttribute,
+            SocialSecurityNumberAttribute,
+        ]
+
+        groups = {}
+        for attr_class in required_attribute_classes:
+            attr_instance = attr_class()
+            attr_name = attr_instance.get_name()
+            aliases = attr_instance.get_aliases()
+
+            # Add DateOfBirth for BirthDate if not already present
+            if attr_name == "BirthDate" and "DateOfBirth" not in aliases:
+                aliases = aliases + ["DateOfBirth"]
+
+            groups[attr_name] = aliases
+
+        return groups
+
     def _validate_dataframe(self, df: DataFrame) -> None:
         """
         Validate that the DataFrame has all required columns.
@@ -238,15 +286,8 @@ class OpenTokenProcessor:
 
         df_columns = set(df.columns)
 
-        # Check for required columns (at least one variant of each must exist)
-        required_groups = {
-            "FirstName": ["FirstName", "GivenName"],
-            "LastName": ["LastName", "Surname"],
-            "BirthDate": ["BirthDate", "DateOfBirth"],
-            "Sex": ["Sex", "Gender"],
-            "PostalCode": ["PostalCode", "ZipCode"],
-            "SocialSecurityNumber": ["SocialSecurityNumber", "NationalIdentificationNumber"],
-        }
+        # Get required attribute groups dynamically
+        required_groups = self._get_required_attribute_groups()
 
         missing = []
         for group_name, variants in required_groups.items():
@@ -269,16 +310,13 @@ class OpenTokenProcessor:
         df_columns = set(df.columns)
         mapping = {}
 
-        # Define column groups with their variants
-        column_groups = {
-            "RecordId": ["RecordId", "Id"],
-            "FirstName": ["FirstName", "GivenName"],
-            "LastName": ["LastName", "Surname"],
-            "BirthDate": ["BirthDate", "DateOfBirth"],
-            "Sex": ["Sex", "Gender"],
-            "PostalCode": ["PostalCode", "ZipCode"],
-            "SocialSecurityNumber": ["SocialSecurityNumber", "NationalIdentificationNumber"],
-        }
+        # Get all attribute groups (including optional RecordId)
+        column_groups = self._get_required_attribute_groups()
+
+        # Add RecordId separately since it's optional
+        record_id_attr = RecordIdAttribute()
+        record_id_aliases = record_id_attr.get_aliases()
+        column_groups[record_id_attr.get_name()] = record_id_aliases
 
         # Find the first matching column for each group
         for standard_name, variants in column_groups.items():
