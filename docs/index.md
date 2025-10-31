@@ -107,7 +107,7 @@ Person attributes are validated before normalization:
 - **PostalCode**: Valid US ZIP or Canadian postal code (no placeholders like 00000)
 - **SSN**: Area ≠ 000/666/900-999, Group ≠ 00, Serial ≠ 0000
 
-See the [main README](https://github.com/mattwise-42/OpenToken#readme) for complete validation and normalization details.
+See the [main README]({{ site.github.repository_url }}#readme) for complete validation and normalization details.
 
 ## Contributing
 
@@ -130,8 +130,8 @@ OpenToken is open source. See the [LICENSE]({{ site.github.repository_url }}/blo
 
 ## Support
 
-- 🐛 [Report Issues](https://github.com/mattwise-42/OpenToken/issues)
-- 💬 [Discussions](https://github.com/mattwise-42/OpenToken/discussions)
+- 🐛 [Report Issues]({{ site.github.repository_url }}/issues)
+- 💬 [Discussions]({{ site.github.repository_url }}/discussions)
 - 📧 Contact the maintainers through GitHub
 
 ---
