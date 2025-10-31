@@ -9,7 +9,7 @@ Welcome to the OpenToken documentation! OpenToken is a dual-implementation (Java
 
 ## Quick Links
 
-- 📖 [Main README](https://github.com/mattwise-42/OpenToken#readme) - Overview, usage, and quick start
+- 📖 [Main README]({{ site.github.repository_url }}#readme) - Overview, usage, and quick start
 - 🛠️ [Development Guide](dev-guide-development) - Setup, build instructions, and contribution guidelines
 - 📊 [Metadata Format](metadata-format) - Understanding metadata output files
 
