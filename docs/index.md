@@ -126,7 +126,7 @@ See the [Development Guide](dev-guide-development) for detailed contribution gui
 
 ## License
 
-OpenToken is open source. See the [LICENSE](https://github.com/mattwise-42/OpenToken/blob/main/LICENSE) file for details.
+OpenToken is open source. See the [LICENSE]({{ site.github.repository_url }}/blob/main/LICENSE) file for details.
 
 ## Support
 
