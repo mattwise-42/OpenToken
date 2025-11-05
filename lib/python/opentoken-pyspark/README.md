@@ -139,15 +139,15 @@ jupyter notebook Custom_Token_Definition_Guide.ipynb
 
 ## Dataset Overlap Analysis
 
-The `OverlapAnalyzer` class helps identify matching records between two tokenized datasets based on encrypted tokens.
+The `OpenTokenOverlapAnalyzer` class helps identify matching records between two tokenized datasets based on encrypted tokens.
 
 ### Basic Usage
 
 ```python
-from opentoken_pyspark import OverlapAnalyzer
+from opentoken_pyspark import OpenTokenOverlapAnalyzer
 
 # Initialize with encryption key (same key used for token generation)
-analyzer = OverlapAnalyzer("encryption-key-32-characters!!")
+analyzer = OpenTokenOverlapAnalyzer("encryption-key-32-characters!!")
 
 # Analyze overlap between two tokenized datasets
 # Match on tokens T1 and T2 (both must match)

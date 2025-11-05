@@ -7,6 +7,6 @@ OpenToken PySpark Bridge - Distributed token generation for PySpark DataFrames.
 __version__ = "1.11.0"
 
 from opentoken_pyspark.token_processor import OpenTokenProcessor
-from opentoken_pyspark.overlap_analyzer import OverlapAnalyzer
+from opentoken_pyspark.overlap_analyzer import OpenTokenOverlapAnalyzer
 
-__all__ = ["OpenTokenProcessor", "OverlapAnalyzer"]
+__all__ = ["OpenTokenProcessor", "OpenTokenOverlapAnalyzer"]

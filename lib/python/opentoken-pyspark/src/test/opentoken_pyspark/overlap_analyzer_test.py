@@ -6,7 +6,7 @@ Tests for dataset overlap analyzer.
 
 import pytest
 from pyspark.sql import SparkSession
-from opentoken_pyspark.overlap_analyzer import OverlapAnalyzer
+from opentoken_pyspark.overlap_analyzer import OpenTokenOverlapAnalyzer
 
 
 @pytest.fixture(scope="module")
@@ -58,23 +58,23 @@ def sample_tokens_df2(spark):
     return spark.createDataFrame(data, ["RecordId", "RuleId", "Token"])
 
 
-class TestOverlapAnalyzerInit:
-    """Tests for OverlapAnalyzer initialization."""
+class TestOpenTokenOverlapAnalyzerInit:
+    """Tests for OpenTokenOverlapAnalyzer initialization."""
 
     def test_init_valid_key(self, encryption_key):
         """Test initialization with valid encryption key."""
-        analyzer = OverlapAnalyzer(encryption_key)
+        analyzer = OpenTokenOverlapAnalyzer(encryption_key)
         assert analyzer.encryption_key == encryption_key.encode('utf-8')
 
     def test_init_empty_key(self):
         """Test initialization with empty key raises ValueError."""
         with pytest.raises(ValueError, match="Encryption key cannot be empty"):
-            OverlapAnalyzer("")
+            OpenTokenOverlapAnalyzer("")
 
     def test_init_invalid_key_length(self):
         """Test initialization with wrong key length raises ValueError."""
         with pytest.raises(ValueError, match="must be exactly 32 bytes"):
-            OverlapAnalyzer("short-key")
+            OpenTokenOverlapAnalyzer("short-key")
 
 
 class TestAnalyzeOverlap:
@@ -84,7 +84,7 @@ class TestAnalyzeOverlap:
         self, spark, encryption_key, sample_tokens_df1, sample_tokens_df2
     ):
         """Test overlap analysis with single matching rule."""
-        analyzer = OverlapAnalyzer(encryption_key)
+        analyzer = OpenTokenOverlapAnalyzer(encryption_key)
         results = analyzer.analyze_overlap(
             sample_tokens_df1, sample_tokens_df2, ["T1"]
         )
@@ -101,7 +101,7 @@ class TestAnalyzeOverlap:
         self, spark, encryption_key, sample_tokens_df1, sample_tokens_df2
     ):
         """Test overlap analysis requiring multiple matching rules."""
-        analyzer = OverlapAnalyzer(encryption_key)
+        analyzer = OpenTokenOverlapAnalyzer(encryption_key)
         results = analyzer.analyze_overlap(
             sample_tokens_df1, sample_tokens_df2, ["T1", "T2", "T3"]
         )
@@ -123,7 +123,7 @@ class TestAnalyzeOverlap:
         df1 = spark.createDataFrame(df1_data, ["RecordId", "RuleId", "Token"])
         df2 = spark.createDataFrame(df2_data, ["RecordId", "RuleId", "Token"])
 
-        analyzer = OverlapAnalyzer(encryption_key)
+        analyzer = OpenTokenOverlapAnalyzer(encryption_key)
         results = analyzer.analyze_overlap(df1, df2, ["T1"])
 
         assert results['matching_records_dataset1'] == 0
@@ -134,7 +134,7 @@ class TestAnalyzeOverlap:
         self, encryption_key, sample_tokens_df1, sample_tokens_df2
     ):
         """Test overlap analysis with custom dataset names."""
-        analyzer = OverlapAnalyzer(encryption_key)
+        analyzer = OpenTokenOverlapAnalyzer(encryption_key)
         results = analyzer.analyze_overlap(
             sample_tokens_df1,
             sample_tokens_df2,
@@ -161,7 +161,7 @@ class TestAnalyzeOverlap:
             ["RecordId", "RuleId", "Token"]
         )
 
-        analyzer = OverlapAnalyzer(encryption_key)
+        analyzer = OpenTokenOverlapAnalyzer(encryption_key)
         with pytest.raises(ValueError, match="must have columns"):
             analyzer.analyze_overlap(df_invalid, df_valid, ["T1"])
 
@@ -169,7 +169,7 @@ class TestAnalyzeOverlap:
         self, encryption_key, sample_tokens_df1, sample_tokens_df2
     ):
         """Test that empty matching rules raise ValueError."""
-        analyzer = OverlapAnalyzer(encryption_key)
+        analyzer = OpenTokenOverlapAnalyzer(encryption_key)
         with pytest.raises(ValueError, match="matching_rules cannot be empty"):
             analyzer.analyze_overlap(
                 sample_tokens_df1, sample_tokens_df2, []
@@ -179,7 +179,7 @@ class TestAnalyzeOverlap:
         self, encryption_key, sample_tokens_df1, sample_tokens_df2
     ):
         """Test that matches DataFrame is returned correctly."""
-        analyzer = OverlapAnalyzer(encryption_key)
+        analyzer = OpenTokenOverlapAnalyzer(encryption_key)
         results = analyzer.analyze_overlap(
             sample_tokens_df1, sample_tokens_df2, ["T1"]
         )
@@ -197,7 +197,7 @@ class TestCompareWithMultipleRules:
         self, encryption_key, sample_tokens_df1, sample_tokens_df2
     ):
         """Test comparison with multiple rule sets."""
-        analyzer = OverlapAnalyzer(encryption_key)
+        analyzer = OpenTokenOverlapAnalyzer(encryption_key)
         rule_sets = [["T1"], ["T1", "T2"], ["T1", "T2", "T3"]]
         results = analyzer.compare_with_multiple_rules(
             sample_tokens_df1, sample_tokens_df2, rule_sets
@@ -228,7 +228,7 @@ class TestCompareWithMultipleRules:
         df1 = spark.createDataFrame(df1_data, ["RecordId", "RuleId", "Token"])
         df2 = spark.createDataFrame(df2_data, ["RecordId", "RuleId", "Token"])
 
-        analyzer = OverlapAnalyzer(encryption_key)
+        analyzer = OpenTokenOverlapAnalyzer(encryption_key)
         rule_sets = [["T1"], ["T1", "T2"]]
         results = analyzer.compare_with_multiple_rules(df1, df2, rule_sets)
 
@@ -245,7 +245,7 @@ class TestPrintSummary:
         self, encryption_key, sample_tokens_df1, sample_tokens_df2, capsys
     ):
         """Test that print_summary executes without error."""
-        analyzer = OverlapAnalyzer(encryption_key)
+        analyzer = OpenTokenOverlapAnalyzer(encryption_key)
         results = analyzer.analyze_overlap(
             sample_tokens_df1, sample_tokens_df2, ["T1"]
         )
