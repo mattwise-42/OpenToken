@@ -2,6 +2,25 @@
 
 This demonstration shows how to use OpenToken for privacy-preserving record linkage between two organizations sharing patient data.
 
+## Quick Start (TL;DR)
+
+```bash
+# 1. Generate datasets
+cd demos/pprl-superhero-example/scripts
+python generate_superhero_datasets.py
+
+# 2. Tokenize both datasets (simulates separate organizations)
+chmod +x tokenize_datasets.sh
+./tokenize_datasets.sh
+
+# 3. Analyze overlap (decrypt and compare tokens)
+python analyze_overlap.py
+```
+
+**Expected Result**: 40 matching patients found (40% of hospital dataset)
+
+---
+
 ## Scenario
 
 **Super Hero Hospital** and **Super Hero Pharmacy** want to link their patient records to improve care coordination, but they need to protect patient privacy. They use OpenToken to:
@@ -57,6 +76,32 @@ This demonstration shows how to properly compare tokens from two organizations t
 - Java 11 or higher
 - Maven 3.6 or higher
 - Python 3.7+ (for data generation and analysis)
+
+## Workflow Overview
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     DATA GENERATION                              │
+│  Hospital (100)          40% Overlap          Pharmacy (120)    │
+│  Super Heroes    ←────────────────────────→   Super Heroes      │
+└─────────────────────────────────────────────────────────────────┘
+                                ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                    TOKENIZATION (Separate)                       │
+│  Hospital uses OpenToken    │    Pharmacy uses OpenToken         │
+│  + Shared Keys              │    + Shared Keys                   │
+│  → hospital_tokens.csv      │    → pharmacy_tokens.csv           │
+│  (encrypted tokens)         │    (encrypted tokens)              │
+└─────────────────────────────────────────────────────────────────┘
+                                ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                    RECORD LINKAGE                                │
+│  1. Decrypt tokens (using shared key)                            │
+│  2. Compare decrypted hashes                                     │
+│  3. Find matches (all 5 tokens must match)                       │
+│  → matching_records.csv (40 matches)                             │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ## Quick Start Guide
 
@@ -274,6 +319,68 @@ pprl-superhero-example/
     ├── pharmacy_tokens.csv.metadata.json
     └── matching_records.csv
 ```
+
+## Step-by-Step: How Organizations Would Use This
+
+### In Real-World Scenarios
+
+This demo simulates how two separate organizations would perform PPRL:
+
+#### Phase 1: Key Agreement (Done Once)
+Both organizations agree on:
+- Hashing secret: `SuperHeroHashingKey2024`
+- Encryption key: `SuperHero-Encryption-Key-32chars` (exactly 32 characters)
+
+**Security Note**: In production, use secure key exchange protocols (e.g., encrypted email, key management systems).
+
+#### Phase 2: Hospital Tokenizes Their Data
+
+```bash
+# Hospital has: hospital_superhero_data.csv
+java -jar opentoken-1.10.0.jar \
+    -t csv \
+    -i hospital_superhero_data.csv \
+    -o hospital_tokens.csv \
+    -h "SuperHeroHashingKey2024" \
+    -e "SuperHero-Encryption-Key-32chars"
+
+# Hospital shares: hospital_tokens.csv (encrypted, safe to share)
+```
+
+#### Phase 3: Pharmacy Tokenizes Their Data
+
+```bash
+# Pharmacy has: pharmacy_superhero_data.csv
+java -jar opentoken-1.10.0.jar \
+    -t csv \
+    -i pharmacy_superhero_data.csv \
+    -o pharmacy_tokens.csv \
+    -h "SuperHeroHashingKey2024" \
+    -e "SuperHero-Encryption-Key-32chars"
+
+# Pharmacy shares: pharmacy_tokens.csv (encrypted, safe to share)
+```
+
+#### Phase 4: Trusted Third Party Performs Matching
+
+A trusted third party (or secure computation environment):
+
+1. Receives both token files
+2. Has the encryption key (to decrypt)
+3. Runs the analysis script:
+
+```bash
+python analyze_overlap.py
+```
+
+4. Returns only matching statistics (not individual patient data)
+
+#### What Each Party Learns
+
+- **Hospital**: "40 of our 100 patients match with pharmacy"
+- **Pharmacy**: "40 of our 120 patients match with hospital"
+- **Neither party sees**: The other party's raw patient data
+- **Optional**: With agreement, they can exchange matched RecordIds to link specific records
 
 ## Customization
 

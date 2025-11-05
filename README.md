@@ -280,6 +280,16 @@ python data_generator.py 100 0.05 test_data.csv
 
 The script generates fake person data and optionally repeats a percentage of records with different record IDs to simulate duplicate persons.
 
+### PPRL Demonstration  <!-- omit in toc -->
+
+A complete Privacy-Preserving Record Linkage demonstration is available in the [`demos/pprl-superhero-example`](demos/pprl-superhero-example) directory. This demo shows:
+
+- How two organizations independently tokenize their datasets
+- How to decrypt and compare tokens for record matching
+- A real-world scenario with Super Hero Hospital and Pharmacy datasets (40% overlap)
+
+See the [PPRL Demo README](demos/pprl-superhero-example/README.md) for complete instructions.
+
 ## Contributing
 
 We welcome contributions including features, bug fixes, documentation updates, and more. Key areas for improvement include:
