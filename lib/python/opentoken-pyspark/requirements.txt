@@ -1,5 +1,5 @@
 # PySpark for distributed processing
-pyspark>=3.0.0
+pyspark==3.5.6
 
 # OpenToken core library (local install required)
-# Install with: pip install -e ../python
+# Install with: pip install -e ../opentoken
