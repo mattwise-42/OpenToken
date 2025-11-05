@@ -137,6 +137,76 @@ cd notebooks
 jupyter notebook Custom_Token_Definition_Guide.ipynb
 ```
 
+## Dataset Overlap Analysis
+
+The `OverlapAnalyzer` class helps identify matching records between two tokenized datasets based on encrypted tokens.
+
+### Basic Usage
+
+```python
+from opentoken_pyspark import OverlapAnalyzer
+
+# Initialize with encryption key (same key used for token generation)
+analyzer = OverlapAnalyzer("encryption-key-32-characters!!")
+
+# Analyze overlap between two tokenized datasets
+# Match on tokens T1 and T2 (both must match)
+results = analyzer.analyze_overlap(
+    tokens_df1,
+    tokens_df2,
+    matching_rules=["T1", "T2"],
+    dataset1_name="Hospital_A",
+    dataset2_name="Hospital_B"
+)
+
+# Print summary
+analyzer.print_summary(results)
+
+# Access detailed results
+print(f"Total records in dataset 1: {results['total_records_dataset1']}")
+print(f"Matching records: {results['matching_records_dataset1']}")
+print(f"Overlap percentage: {results['overlap_percentage']:.2f}%")
+
+# Get DataFrame of matched record pairs
+matches_df = results['matches']
+matches_df.show()
+```
+
+### Compare with Multiple Rule Sets
+
+```python
+# Compare overlap using different matching criteria
+rule_sets = [
+    ["T1"],              # Match on T1 only
+    ["T1", "T2"],        # Match on T1 AND T2
+    ["T1", "T2", "T3"]   # Match on T1 AND T2 AND T3
+]
+
+results = analyzer.compare_with_multiple_rules(
+    tokens_df1, tokens_df2, rule_sets
+)
+
+# See how overlap changes with stricter rules
+for result in results:
+    print(f"Rules {result['matching_rules']}: "
+          f"{result['overlap_percentage']:.2f}% overlap")
+```
+
+### Use Cases
+
+- **Data Quality Assessment**: Identify duplicate records across datasets
+- **Patient Matching**: Find matching patients between healthcare systems
+- **Research Cohort Overlap**: Analyze overlap between research study populations
+- **Data Sharing Analysis**: Assess data overlap before establishing data sharing agreements
+
+### How It Works
+
+1. Both datasets must contain tokenized records (RecordId, RuleId, Token columns)
+2. Matching rules specify which token types must match (e.g., ["T1", "T2"])
+3. Records are considered matching only if ALL specified token types match
+4. The analyzer provides statistics and a DataFrame of matched record pairs
+5. Uses the same encryption key that was used to generate the tokens
+
 ## Testing
 
 Run the test suite:
