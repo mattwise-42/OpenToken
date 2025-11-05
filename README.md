@@ -223,7 +223,7 @@ java -jar target/opentoken-*.jar \
 cd lib/python
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt -r dev-requirements.txt -e .
-PYTHONPATH=src/main python src/main/opentoken/main.py \
+PYTHONPATH=opentoken/src/main python opentoken/src/main/opentoken/main.py \
   -i ../../resources/sample.csv -t csv -o target/output.csv \
   -h "HashingKey" -e "Secret-Encryption-Key-Goes-Here."
 ```
@@ -235,7 +235,7 @@ For distributed token generation using PySpark:
 ```shell
 cd lib/python
 pip install -e .
-cd ../python-pyspark
+cd opentoken-pyspark
 pip install -e .
 ```
 
@@ -262,7 +262,7 @@ tokens_df = processor.process_dataframe(df)
 tokens_df.show()
 ```
 
-See the [PySpark Bridge README](lib/python-pyspark/README.md) and [example notebook](lib/python-pyspark/notebooks/OpenToken_PySpark_Example.ipynb) for more details.
+See the [PySpark Bridge README](lib/python/opentoken-pyspark/README.md) and [example notebook](lib/python/opentoken-pyspark/notebooks/OpenToken_PySpark_Example.ipynb) for more details.
 
 ## Development & Documentation
 
@@ -279,12 +279,17 @@ Quick parity note: Java and Python implementations produce identical tokens for 
 
 ```
 lib/
-├── java/           # Java implementation (Maven)
-├── python/         # Python implementation (pip)
-├── python-pyspark/ # PySpark bridge for distributed token generation
-tools/              # Utility scripts and tools
-docs/               # Documentation
-.devcontainer/      # Development container configuration
+├── java/
+│   └── opentoken/          # Java implementation (Maven)
+│       └── src/
+├── python/
+│   ├── opentoken/          # Python core implementation (pip)
+│   │   └── src/
+│   └── opentoken-pyspark/  # PySpark bridge for distributed token generation
+│       └── src/
+tools/                      # Utility scripts and tools
+docs/                       # Documentation
+.devcontainer/              # Development container configuration
 ```
 
 ### Development Environment  <!-- omit in toc -->

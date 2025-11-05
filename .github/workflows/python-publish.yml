@@ -67,7 +67,7 @@ jobs:
     
     - name: Build opentoken-pyspark package
       run: |
-        cd lib/python-pyspark
+        cd lib/python/opentoken-pyspark
         python -m build
     
     - name: Publish opentoken-pyspark to GitHub Packages
@@ -76,7 +76,7 @@ jobs:
         TWINE_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         TWINE_REPOSITORY_URL: https://upload.pypi.org/legacy/
       run: |
-        cd lib/python-pyspark
+        cd lib/python/opentoken-pyspark
         # For GitHub Packages, use this instead:
         # python -m twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
         echo "Package built successfully. Configure PyPI token to publish."

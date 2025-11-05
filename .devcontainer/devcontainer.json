@@ -50,7 +50,10 @@
         }
     },
     "mounts": [],
-    "containerEnv": {},
-    "postCreateCommand": {},
+    "containerEnv": {
+        "VIRTUAL_ENV": "/workspaces/OpenToken/.venv",
+        "PATH": "/workspaces/OpenToken/.venv/bin:${PATH}"
+    },
+    "postCreateCommand": "bash .devcontainer/scripts/setup-python-env.sh",
     "postStartCommand": {}
 }

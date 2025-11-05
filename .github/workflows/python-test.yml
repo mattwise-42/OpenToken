@@ -4,14 +4,14 @@ on:
   push:
     branches: [ main, develop ]
     paths:
-      - 'lib/python/**'
-      - 'lib/python-pyspark/**'
+      - 'lib/python/opentoken/**'
+      - 'lib/python/opentoken-pyspark/**'
       - '.github/workflows/python-test.yml'
   pull_request:
     branches: [ main, develop ]
     paths:
-      - 'lib/python/**'
-      - 'lib/python-pyspark/**'
+      - 'lib/python/opentoken/**'
+      - 'lib/python/opentoken-pyspark/**'
       - '.github/workflows/python-test.yml'
 
 jobs:
@@ -46,18 +46,18 @@ jobs:
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        flake8 lib/python/src --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 lib/python/opentoken/src --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings
-        flake8 lib/python/src --count --exit-zero --statistics
+        flake8 lib/python/opentoken/src --count --exit-zero --statistics
     
     - name: Test with pytest
       run: |
-        PYTHONPATH=lib/python/src/main pytest lib/python/src/test
+        PYTHONPATH=lib/python/opentoken/src/main pytest lib/python/opentoken/src/test
 
     - name: Run main.py
       run: |
         cd lib/python
-        PYTHONPATH=src/main python3 src/main/opentoken/main.py -i ../../resources/sample.csv -t csv -o target/output.csv -h "HashingKey"  -e "Secret-Encryption-Key-Goes-Here."
+        PYTHONPATH=opentoken/src/main python3 opentoken/src/main/opentoken/main.py -i ../../resources/sample.csv -t csv -o target/output.csv -h "HashingKey"  -e "Secret-Encryption-Key-Goes-Here."
 
     - name: Validate Output Files Exist
       run: |
@@ -118,19 +118,19 @@ jobs:
     
     - name: Install pyspark dependencies
       run: |
-        if [ -f lib/python-pyspark/requirements.txt ]; then
-          pip install -r lib/python-pyspark/requirements.txt
+        if [ -f lib/python/opentoken-pyspark/requirements.txt ]; then
+          pip install -r lib/python/opentoken-pyspark/requirements.txt
         fi
         pip install pytest flake8
-        pip install -e lib/python-pyspark/
+        pip install -e lib/python/opentoken-pyspark/
     
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        flake8 lib/python-pyspark/src --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 lib/python/opentoken-pyspark/src --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings
-        flake8 lib/python-pyspark/src --count --exit-zero --statistics
+        flake8 lib/python/opentoken-pyspark/src --count --exit-zero --statistics
     
     - name: Test with pytest
       run: |
-        PYTHONPATH=lib/python/src/main:lib/python-pyspark/src/main pytest lib/python-pyspark/src/test
+        PYTHONPATH=lib/python/opentoken/src/main:lib/python/opentoken-pyspark/src/main pytest lib/python/opentoken-pyspark/src/test

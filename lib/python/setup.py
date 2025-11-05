@@ -31,8 +31,8 @@ setup(
         "Source": "https://github.com/Truveta/OpenToken",
         "Documentation": "https://github.com/Truveta/OpenToken/blob/main/README.md",
     },
-    package_dir={"": "src/main"},
-    packages=find_packages(where="src/main"),
+    package_dir={"": "opentoken/src/main"},
+    packages=find_packages(where="opentoken/src/main"),
     python_requires=">=3.10",
     install_requires=requirements,
     extras_require={

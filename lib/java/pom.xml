@@ -219,6 +219,8 @@
 
     <!-- Build lifecycle plugins -->
     <build>
+        <sourceDirectory>opentoken/src/main/java</sourceDirectory>
+        <testSourceDirectory>opentoken/src/test/java</testSourceDirectory>
         <plugins>
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
