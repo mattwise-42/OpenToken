@@ -202,14 +202,28 @@ def print_metadata_summary(hospital_metadata, pharmacy_metadata):
 
 def main():
     """Main function to analyze overlap between datasets."""
+    import sys
+    
     print()
     print("=" * 70)
     print("PPRL Overlap Analysis - Superhero Hospital & Pharmacy")
     print("=" * 70)
     print()
     
-    # Configuration - must match the keys used during tokenization
-    encryption_key = "SuperHero-Encryption-Key-32chars"
+    # Accept encryption key as argument or use default for demo
+    if len(sys.argv) > 1:
+        encryption_key = sys.argv[1]
+    else:
+        encryption_key = "SuperHero-Encryption-Key-32chars"
+        print("Note: Using default encryption key for demo")
+        print("      For custom keys, run: python analyze_overlap.py <ENCRYPTION_KEY>")
+        print()
+    
+    # Validate encryption key length
+    if len(encryption_key) != 32:
+        print(f"Error: Encryption key must be exactly 32 characters (got {len(encryption_key)})")
+        print("Usage: python analyze_overlap.py [ENCRYPTION_KEY]")
+        sys.exit(1)
     
     # File paths
     hospital_tokens_file = '../outputs/hospital_tokens.csv'

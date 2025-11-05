@@ -4,14 +4,21 @@ This demonstration shows how to use OpenToken for privacy-preserving record link
 
 ## Quick Start (TL;DR)
 
-**Option 1: Run Everything at Once**
+**Option 1: Run Everything at Once (with default demo secrets)**
 ```bash
 cd demos/pprl-superhero-example/scripts
 chmod +x run_complete_demo.sh
 ./run_complete_demo.sh
 ```
 
-**Option 2: Step-by-Step**
+**Option 2: Run with Custom Secrets**
+```bash
+cd demos/pprl-superhero-example/scripts
+chmod +x run_complete_demo.sh
+./run_complete_demo.sh "YourHashingSecret" "Your-32-Character-Encryption-Key"
+```
+
+**Option 3: Step-by-Step**
 ```bash
 # 1. Generate datasets
 cd demos/pprl-superhero-example/scripts
@@ -19,10 +26,14 @@ python generate_superhero_datasets.py
 
 # 2. Tokenize both datasets (simulates separate organizations)
 chmod +x tokenize_datasets.sh
-./tokenize_datasets.sh
+./tokenize_datasets.sh  # Uses default demo secrets
+# OR with custom secrets:
+# ./tokenize_datasets.sh "YourHashingSecret" "Your-32-Character-Encryption-Key"
 
 # 3. Analyze overlap (decrypt and compare tokens)
-python analyze_overlap.py
+python analyze_overlap.py  # Uses default encryption key
+# OR with custom key:
+# python analyze_overlap.py "Your-32-Character-Encryption-Key"
 ```
 
 **Expected Result**: 40 matching patients found (40% of hospital dataset)
@@ -128,10 +139,18 @@ This creates:
 
 Each organization tokenizes their own dataset independently:
 
+**Using Default Demo Secrets:**
 ```bash
 cd scripts
 chmod +x tokenize_datasets.sh
 ./tokenize_datasets.sh
+```
+
+**Using Custom Secrets:**
+```bash
+cd scripts
+chmod +x tokenize_datasets.sh
+./tokenize_datasets.sh "YourHashingSecret" "Your-32-Character-Encryption-Key"
 ```
 
 This script simulates two separate tokenization processes:
@@ -141,14 +160,22 @@ This script simulates two separate tokenization processes:
 
 **Critical Requirements**:
 - Both organizations must use the **same hashing and encryption keys**
+- The encryption key must be exactly **32 characters** long
 - Keys must be shared securely between organizations before tokenization
 - In production, use strong keys and secure key exchange protocols
 
 ### Step 3: Measure Overlap
 
+**Using Default Encryption Key:**
 ```bash
 cd scripts
 python analyze_overlap.py
+```
+
+**Using Custom Encryption Key:**
+```bash
+cd scripts
+python analyze_overlap.py "Your-32-Character-Encryption-Key"
 ```
 
 This script performs the record linkage analysis:
@@ -161,7 +188,7 @@ This script performs the record linkage analysis:
 4. **Reports** matching statistics
 5. **Saves** results to `outputs/matching_records.csv`
 
-**Note**: The analysis script requires the encryption key to decrypt tokens. This key must match the one used during tokenization.
+**Note**: The encryption key provided to the analysis script must match the one used during tokenization.
 
 ## Expected Results
 
@@ -335,22 +362,27 @@ pprl-superhero-example/
 This demo simulates how two separate organizations would perform PPRL:
 
 #### Phase 1: Key Agreement (Done Once)
-Both organizations agree on:
+Both organizations agree on shared secrets:
+- **Hashing secret**: A shared secret for HMAC-SHA256 (any length)
+- **Encryption key**: A shared 32-character key for AES-256-GCM
+
+**Security Note**: In production, use secure key exchange protocols (e.g., encrypted email, key management systems, HSMs).
+
+**Example Keys (for demo only):**
 - Hashing secret: `SuperHeroHashingKey2024`
 - Encryption key: `SuperHero-Encryption-Key-32chars` (exactly 32 characters)
-
-**Security Note**: In production, use secure key exchange protocols (e.g., encrypted email, key management systems).
 
 #### Phase 2: Hospital Tokenizes Their Data
 
 ```bash
 # Hospital has: hospital_superhero_data.csv
+# Hospital uses their agreed-upon secrets
 java -jar opentoken-1.10.0.jar \
     -t csv \
     -i hospital_superhero_data.csv \
     -o hospital_tokens.csv \
-    -h "SuperHeroHashingKey2024" \
-    -e "SuperHero-Encryption-Key-32chars"
+    -h "<AGREED_HASHING_SECRET>" \
+    -e "<AGREED_32_CHAR_ENCRYPTION_KEY>"
 
 # Hospital shares: hospital_tokens.csv (encrypted, safe to share)
 ```
@@ -359,12 +391,13 @@ java -jar opentoken-1.10.0.jar \
 
 ```bash
 # Pharmacy has: pharmacy_superhero_data.csv
+# Pharmacy uses the SAME secrets as hospital
 java -jar opentoken-1.10.0.jar \
     -t csv \
     -i pharmacy_superhero_data.csv \
     -o pharmacy_tokens.csv \
-    -h "SuperHeroHashingKey2024" \
-    -e "SuperHero-Encryption-Key-32chars"
+    -h "<AGREED_HASHING_SECRET>" \
+    -e "<AGREED_32_CHAR_ENCRYPTION_KEY>"
 
 # Pharmacy shares: pharmacy_tokens.csv (encrypted, safe to share)
 ```
@@ -375,10 +408,10 @@ A trusted third party (or secure computation environment):
 
 1. Receives both token files
 2. Has the encryption key (to decrypt)
-3. Runs the analysis script:
+3. Runs the analysis script with the encryption key:
 
 ```bash
-python analyze_overlap.py
+python analyze_overlap.py "<AGREED_32_CHAR_ENCRYPTION_KEY>"
 ```
 
 4. Returns only matching statistics (not individual patient data)
@@ -404,14 +437,27 @@ overlap_percentage = 0.30  # 30% overlap
 
 ### Using Different Secrets
 
-Edit `tokenize_datasets.sh`:
+Pass secrets as command-line arguments:
 
+**For tokenization:**
 ```bash
-HASHING_SECRET="YourCustomHashingKey"
-ENCRYPTION_KEY="YourCustomEncryptionKey-32"
+./tokenize_datasets.sh "YourCustomHashingKey" "YourCustomEncryptionKey-32chars"
 ```
 
-**Important**: Both datasets must use the same secrets for tokens to be comparable!
+**For analysis:**
+```bash
+python analyze_overlap.py "YourCustomEncryptionKey-32chars"
+```
+
+**For complete demo:**
+```bash
+./run_complete_demo.sh "YourCustomHashingKey" "YourCustomEncryptionKey-32chars"
+```
+
+**Important**: 
+- The encryption key must be exactly 32 characters long
+- Both datasets must use the same secrets for tokens to be comparable
+- The analysis script needs the same encryption key used during tokenization
 
 ### Adjusting Match Criteria
 

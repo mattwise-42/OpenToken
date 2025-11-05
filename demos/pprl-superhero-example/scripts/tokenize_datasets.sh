@@ -2,6 +2,10 @@
 #
 # Tokenize both hospital and pharmacy datasets using OpenToken
 # This script generates encrypted tokens for privacy-preserving record linkage
+#
+# Usage: ./tokenize_datasets.sh [HASHING_SECRET] [ENCRYPTION_KEY]
+#   HASHING_SECRET: Secret for HMAC-SHA256 hashing (optional, defaults to demo value)
+#   ENCRYPTION_KEY: Key for AES-256 encryption (optional, must be exactly 32 characters)
 
 set -e
 
@@ -13,9 +17,16 @@ DATASETS_DIR="$DEMO_DIR/datasets"
 OUTPUTS_DIR="$DEMO_DIR/outputs"
 JAVA_DIR="$PROJECT_ROOT/lib/java"
 
-# Secrets for token generation (CHANGE THESE IN PRODUCTION!)
-HASHING_SECRET="SuperHeroHashingKey2024"
-ENCRYPTION_KEY="SuperHero-Encryption-Key-32chars"  # Must be exactly 32 characters
+# Accept secrets as arguments or use defaults for demo
+HASHING_SECRET="${1:-SuperHeroHashingKey2024}"
+ENCRYPTION_KEY="${2:-SuperHero-Encryption-Key-32chars}"
+
+# Validate encryption key length
+if [ ${#ENCRYPTION_KEY} -ne 32 ]; then
+    echo "Error: Encryption key must be exactly 32 characters (got ${#ENCRYPTION_KEY})"
+    echo "Usage: $0 [HASHING_SECRET] [ENCRYPTION_KEY]"
+    exit 1
+fi
 
 # Colors for output
 GREEN='\033[0;32m'
