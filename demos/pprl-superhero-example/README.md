@@ -4,6 +4,14 @@ This demonstration shows how to use OpenToken for privacy-preserving record link
 
 ## Quick Start (TL;DR)
 
+**Option 1: Run Everything at Once**
+```bash
+cd demos/pprl-superhero-example/scripts
+chmod +x run_complete_demo.sh
+./run_complete_demo.sh
+```
+
+**Option 2: Step-by-Step**
 ```bash
 # 1. Generate datasets
 cd demos/pprl-superhero-example/scripts
