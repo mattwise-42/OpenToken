@@ -50,10 +50,12 @@
         }
     },
     "mounts": [],
-    "containerEnv": {
-        "VIRTUAL_ENV": "${containerWorkspaceFolder}/.venv",
-        "PATH": "${containerWorkspaceFolder}/.venv/bin:${PATH}"
+    "remoteEnv": {
+        "PATH": "${containerEnv:PATH}:${containerWorkspaceFolder}/.venv/bin",
+        "VIRTUAL_ENV": "${containerWorkspaceFolder}/.venv"
     },
-    "postCreateCommand": "bash .devcontainer/scripts/setup-python-env.sh",
+    "postCreateCommand": {
+        "setup-python-env": ".devcontainer/scripts/setup-python-env.sh"
+    },
     "postStartCommand": {}
 }
