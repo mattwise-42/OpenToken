@@ -89,13 +89,52 @@ The output DataFrame contains:
 
 Each input record produces multiple output rows (one per token rule).
 
-## Example Notebook
+## Using Custom Token Definitions
 
-See the included Jupyter notebook for a complete example:
+You can define custom tokens using the `opentoken.notebook_helpers` module and pass them to the processor:
 
+```python
+from opentoken.notebook_helpers import TokenBuilder, CustomTokenDefinition
+from opentoken_pyspark import OpenTokenProcessor
+
+# Method 1: Using TokenBuilder
+custom_token = TokenBuilder("T6") \
+    .add("last_name", "T|U") \
+    .add("first_name", "T|U") \
+    .add("birth_date", "T|D") \
+    .add("postal_code", "T|S(0,3)") \
+    .add("sex", "T|U") \
+    .build()
+
+custom_definition = CustomTokenDefinition().add_token(custom_token)
+
+# Create processor with custom token definition
+processor = OpenTokenProcessor(
+    hashing_secret="your-hashing-secret",
+    encryption_key="your-encryption-key-32-chars!!",
+    token_definition=custom_definition  # Pass custom definition here
+)
+
+# Process DataFrame - will use T6 instead of default T1-T5
+tokens_df = processor.process_dataframe(df)
+```
+
+For more examples and interactive experimentation with custom tokens, see the [Custom Token Definition Guide](notebooks/Custom_Token_Definition_Guide.ipynb).
+
+## Example Notebooks
+
+See the included Jupyter notebooks for complete examples:
+
+**Basic Usage:**
 ```bash
 cd notebooks
 jupyter notebook OpenToken_PySpark_Example.ipynb
+```
+
+**Custom Token Definitions:**
+```bash
+cd notebooks
+jupyter notebook Custom_Token_Definition_Guide.ipynb
 ```
 
 ## Testing

@@ -235,3 +235,78 @@ class TestOpenTokenProcessor:
         # Process should return empty DataFrame
         result = processor.process_dataframe(df)
         assert result.count() == 0
+
+    def test_custom_token_definition(self, spark, sample_data):
+        """Test using custom token definition with processor."""
+        from opentoken.notebook_helpers import TokenBuilder, CustomTokenDefinition
+
+        # Create a custom T6 token
+        t6_token = TokenBuilder("T6") \
+            .add("last_name", "T|U") \
+            .add("first_name", "T|U") \
+            .add("birth_date", "T|D") \
+            .build()
+
+        custom_definition = CustomTokenDefinition().add_token(t6_token)
+
+        # Create processor with custom definition
+        processor = OpenTokenProcessor(
+            hashing_secret="test-hash-secret",
+            encryption_key="12345678901234567890123456789012",
+            token_definition=custom_definition
+        )
+
+        # Create DataFrame
+        df = spark.createDataFrame(sample_data)
+
+        # Process with custom tokens
+        result = processor.process_dataframe(df)
+
+        # Verify we got T6 tokens (not default T1-T5)
+        rule_ids = [row.RuleId for row in result.select("RuleId").distinct().collect()]
+        assert "T6" in rule_ids
+        assert "T1" not in rule_ids  # Default tokens should not be present
+
+        # Verify we have tokens for each record
+        assert result.count() == len(sample_data)  # One T6 token per record
+
+    def test_multiple_custom_tokens(self, spark, sample_data):
+        """Test using multiple custom tokens."""
+        from opentoken.notebook_helpers import TokenBuilder, CustomTokenDefinition
+
+        # Create two custom tokens
+        t6_token = TokenBuilder("T6") \
+            .add("last_name", "T|U") \
+            .add("first_name", "T|U") \
+            .build()
+
+        t7_token = TokenBuilder("T7") \
+            .add("last_name", "T|S(0,3)|U") \
+            .add("birth_date", "T|D") \
+            .build()
+
+        custom_definition = CustomTokenDefinition() \
+            .add_token(t6_token) \
+            .add_token(t7_token)
+
+        # Create processor with multiple custom tokens
+        processor = OpenTokenProcessor(
+            hashing_secret="test-hash-secret",
+            encryption_key="12345678901234567890123456789012",
+            token_definition=custom_definition
+        )
+
+        # Create DataFrame
+        df = spark.createDataFrame(sample_data)
+
+        # Process with custom tokens
+        result = processor.process_dataframe(df)
+
+        # Verify we got both T6 and T7 tokens
+        rule_ids = [row.RuleId for row in result.select("RuleId").distinct().collect()]
+        assert "T6" in rule_ids
+        assert "T7" in rule_ids
+        assert "T1" not in rule_ids  # Default tokens should not be present
+
+        # Verify we have 2 tokens per record (T6 and T7)
+        assert result.count() == len(sample_data) * 2

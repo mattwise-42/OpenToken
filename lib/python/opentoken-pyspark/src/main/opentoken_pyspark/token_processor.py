@@ -5,7 +5,7 @@ PySpark token processor for distributed token generation.
 """
 
 import logging
-from typing import Dict, Type
+from typing import Dict, Type, Optional
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import pandas_udf, col
 from pyspark.sql.types import StructType, StructField, StringType, ArrayType
@@ -22,6 +22,7 @@ from opentoken.attributes.person.postal_code_attribute import PostalCodeAttribut
 from opentoken.attributes.person.social_security_number_attribute import SocialSecurityNumberAttribute
 from opentoken.attributes.general.record_id_attribute import RecordIdAttribute
 from opentoken.tokens.token_definition import TokenDefinition
+from opentoken.tokens.base_token_definition import BaseTokenDefinition
 from opentoken.tokens.token_generator import TokenGenerator
 from opentoken.tokentransformer.hash_token_transformer import HashTokenTransformer
 from opentoken.tokentransformer.encrypt_token_transformer import EncryptTokenTransformer
@@ -68,16 +69,29 @@ class OpenTokenProcessor:
         cls.COLUMN_MAPPINGS = mappings
         return mappings
 
-    def __init__(self, hashing_secret: str, encryption_key: str):
+    def __init__(self, hashing_secret: str, encryption_key: str,
+                 token_definition: Optional[BaseTokenDefinition] = None):
         """
         Initialize the OpenToken processor with secrets.
 
         Args:
             hashing_secret: Secret for HMAC-SHA256 hashing
             encryption_key: Key for AES-256 encryption
+            token_definition: Optional custom token definition. If None, uses default tokens (T1-T5).
+                             Use this to pass custom tokens created with TokenBuilder or CustomTokenDefinition.
 
         Raises:
             ValueError: If secrets are empty or invalid
+
+        Example:
+            >>> # Using default tokens
+            >>> processor = OpenTokenProcessor("hash-secret", "encryption-key-32-characters!!")
+            >>>
+            >>> # Using custom token definition
+            >>> from opentoken.notebook_helpers import TokenBuilder, CustomTokenDefinition
+            >>> custom_token = TokenBuilder("T6").add("last_name", "T|U").add("first_name", "T|U").build()
+            >>> custom_def = CustomTokenDefinition().add_token(custom_token)
+            >>> processor = OpenTokenProcessor("hash-secret", "encryption-key-32-chars!!", custom_def)
         """
         if not hashing_secret or not hashing_secret.strip():
             raise ValueError("Hashing secret cannot be empty")
@@ -86,6 +100,7 @@ class OpenTokenProcessor:
 
         self.hashing_secret = hashing_secret
         self.encryption_key = encryption_key
+        self.token_definition = token_definition  # Store custom token definition
 
         # Build column mappings if not already built
         self._build_column_mappings()
@@ -123,9 +138,10 @@ class OpenTokenProcessor:
         # Validate input DataFrame
         self._validate_dataframe(df)
 
-        # Get the secrets for the UDF
+        # Get the secrets and token definition for the UDF
         hashing_secret = self.hashing_secret
         encryption_key = self.encryption_key
+        token_definition = self.token_definition
 
         # Define the schema for the output (array of structs)
         token_schema = ArrayType(StructType([
@@ -156,9 +172,12 @@ class OpenTokenProcessor:
                 EncryptTokenTransformer(encryption_key)
             ]
 
+            # Use custom token definition if provided, otherwise use default
+            definition = token_definition if token_definition is not None else TokenDefinition()
+
             # Initialize token generator
             token_generator = TokenGenerator(
-                TokenDefinition(), token_transformer_list
+                definition, token_transformer_list
             )
 
             results = []
