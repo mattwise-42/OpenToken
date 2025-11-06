@@ -41,7 +41,8 @@
                 "shengchen.vscode-checkstyle",
                 "GitHub.vscode-github-actions",
                 "GitHub.copilot-chat",
-                "ms-python.python"
+                "ms-python.python",
+                "ms-toolsai.jupyter"
             ],
             "settings": {
                 "sonarlint.ls.javaHome": "/usr/local/sdkman/candidates/java/17.0.16-ms"
