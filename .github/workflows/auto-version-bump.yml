@@ -75,11 +75,8 @@ jobs:
         run: |
           VERSION="${{ steps.extract_version.outputs.version }}"
           
-          # Update .bumpversion.cfg with new version
-          sed -i "s/current_version = .*/current_version = $VERSION/" .bumpversion.cfg
-          
-          # Run bump2version to update all files (using --no-commit --no-tag since we commit manually)
-          bump2version --new-version "$VERSION" --allow-dirty patch
+          # Use bump2version with --new-version to set the exact version
+          bump2version --new-version "$VERSION" --allow-dirty patch --no-commit --no-tag
           
           echo "Updated version to $VERSION"
       

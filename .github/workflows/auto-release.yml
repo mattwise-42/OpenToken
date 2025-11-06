@@ -1,7 +1,8 @@
 name: Create Release on Merge
 
 on:
-  push:
+  pull_request:
+    types: [closed]
     branches:
       - main
 
@@ -12,8 +13,10 @@ permissions:
 jobs:
   create-release:
     runs-on: ubuntu-latest
-    # Only run if this was a merge from a release branch
-    if: startsWith(github.event.head_commit.message, 'Merge pull request') || contains(github.event.head_commit.message, 'release/')
+    # Only run if PR was merged and came from a release branch
+    if: |
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.head.ref, 'release/')
     
     steps:
       - name: Checkout code
@@ -114,8 +117,7 @@ jobs:
               name: `Release ${version}`,
               body: releaseNotes,
               draft: false,
-              prerelease: false,
-              generate_release_notes: true
+              prerelease: false
             });
             
             console.log(`Created release: ${release.data.html_url}`);
