@@ -16,7 +16,7 @@ import base64
 logger = logging.getLogger(__name__)
 
 
-class OverlapAnalyzer:
+class OpenTokenOverlapAnalyzer:
     """
     Analyze overlap between two tokenized datasets based on matching rules.
 
@@ -37,7 +37,7 @@ class OverlapAnalyzer:
             ValueError: If encryption key is empty or invalid length
 
         Example:
-            >>> analyzer = OverlapAnalyzer("encryption-key-32-characters!!")
+            >>> analyzer = OpenTokenOverlapAnalyzer("encryption-key-32-characters!!")
         """
         if not encryption_key or not encryption_key.strip():
             raise ValueError("Encryption key cannot be empty")
@@ -103,7 +103,7 @@ class OverlapAnalyzer:
             ValueError: If datasets don't have required columns or matching_rules is empty
 
         Example:
-            >>> analyzer = OverlapAnalyzer("encryption-key-32-characters!!")
+            >>> analyzer = OpenTokenOverlapAnalyzer("encryption-key-32-characters!!")
             >>> # Match on T1 and T2 tokens (both must match)
             >>> results = analyzer.analyze_overlap(tokens_df1, tokens_df2, ["T1", "T2"])
             >>> print(f"Matching records: {results['matching_records']}")
@@ -220,7 +220,7 @@ class OverlapAnalyzer:
             List of analysis results, one for each rule set
 
         Example:
-            >>> analyzer = OverlapAnalyzer("encryption-key-32-characters!!")
+            >>> analyzer = OpenTokenOverlapAnalyzer("encryption-key-32-characters!!")
             >>> rule_sets = [["T1"], ["T1", "T2"], ["T1", "T2", "T3"]]
             >>> results = analyzer.compare_with_multiple_rules(df1, df2, rule_sets)
             >>> for result in results:
