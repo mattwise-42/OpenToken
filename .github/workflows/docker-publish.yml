@@ -2,7 +2,7 @@ name: Docker Publish
 
 on:
   pull_request:
-    branches: ["main"]
+    branches: ["main", "pre-release"]
   release:
     types: [created, published, released]
   # Added pull_request trigger - pull requests now trigger builds for validation
