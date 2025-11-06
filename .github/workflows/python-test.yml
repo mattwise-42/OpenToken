@@ -2,12 +2,12 @@ name: Python CI
 
 on:
   push:
-    branches: [ main, pre-release, develop ]
+    branches: [ main, develop ]
     paths:
       - 'lib/python/**'
       - '.github/workflows/python-test.yml'
   pull_request:
-    branches: [ main, pre-release, develop ]
+    branches: [ main, develop ]
     paths:
       - 'lib/python/**'
       - '.github/workflows/python-test.yml'

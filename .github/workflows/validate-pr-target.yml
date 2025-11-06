@@ -32,9 +32,9 @@ jobs:
               core.setFailed(
                 `❌ PRs to main must come from release/* branches.\n\n` +
                 `Current head branch: ${headRef}\n\n` +
-                `Standard development work should target the 'pre-release' branch.\n` +
+                `Standard development work should target the 'develop' branch.\n` +
                 `Only release PRs from 'release/x.y.z' branches can target 'main'.\n\n` +
-                `Please close this PR and open a new one targeting 'pre-release' instead.`
+                `Please close this PR and open a new one targeting 'develop' instead.`
               );
               return;
             }

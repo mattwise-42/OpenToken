@@ -9,9 +9,9 @@ This document provides step-by-step instructions for repository administrators t
 
 ## Setup Steps
 
-### 1. Create the `pre-release` Branch
+### 1. Create the `develop` Branch
 
-The `pre-release` branch serves as the primary development branch where all feature work is merged before being promoted to `main`.
+The `develop` branch serves as the primary development branch where all feature work is merged before being promoted to `main`.
 
 ```bash
 # Clone or update your local repository
@@ -22,18 +22,18 @@ cd OpenToken
 git checkout main
 git pull origin main
 
-# Create pre-release branch from main
-git checkout -b pre-release
+# Create develop branch from main
+git checkout -b develop
 
 # Push to GitHub
-git push -u origin pre-release
+git push -u origin develop
 ```
 
 **Alternative**: Create the branch directly on GitHub:
 1. Go to the repository on GitHub
 2. Click the branch dropdown (currently showing "main")
-3. Type "pre-release" in the search box
-4. Click "Create branch: pre-release from main"
+3. Type "develop" in the search box
+4. Click "Create branch: develop from main"
 
 ### 2. Configure Branch Protection for `main`
 
@@ -72,12 +72,12 @@ These settings ensure that only release PRs can merge to `main`.
 
 5. Click **Create** or **Save changes**
 
-### 3. Configure Branch Protection for `pre-release` (Recommended)
+### 3. Configure Branch Protection for `develop` (Recommended)
 
-While not strictly required, protecting `pre-release` ensures code quality.
+While not strictly required, protecting `develop` ensures code quality.
 
 1. **Settings** → **Branches** → **Add rule**
-2. Branch name pattern: `pre-release`
+2. Branch name pattern: `develop`
 3. Configure:
    - ✅ Require a pull request before merging
    - ✅ Require status checks to pass before merging
@@ -89,12 +89,12 @@ The default branch determines which branch is shown to visitors and used for new
 
 **Current Recommendation**: Keep `main` as the default branch
 - Visitors see the stable release version
-- The retargeting workflow will automatically redirect feature PRs to `pre-release`
+- The retargeting workflow will automatically redirect feature PRs to `develop`
 
-**Alternative**: Set `pre-release` as default
-- Developers automatically target `pre-release` for new PRs
+**Alternative**: Set `develop` as default
+- Developers automatically target `develop` for new PRs
 - No auto-retargeting needed for most PRs
-- To change: **Settings** → **Branches** → **Default branch** → Change to `pre-release`
+- To change: **Settings** → **Branches** → **Default branch** → Change to `develop`
 
 ### 5. Verify the Setup
 
@@ -104,8 +104,8 @@ Test that everything is working correctly:
 
 ```bash
 # Create a test feature branch
-git checkout pre-release
-git pull origin pre-release
+git checkout develop
+git pull origin develop
 git checkout -b test/workflow-validation
 echo "test" > test-file.txt
 git add test-file.txt
@@ -114,8 +114,8 @@ git push origin test/workflow-validation
 ```
 
 1. Open a PR from `test/workflow-validation` to `main`
-2. ✅ The `retarget-pr-to-pre-release` workflow should automatically:
-   - Change the base branch to `pre-release`
+2. ✅ The `retarget-pr-to-develop` workflow should automatically:
+   - Change the base branch to `develop`
    - Post a comment explaining the change
 3. Close and delete the test PR/branch
 
@@ -123,8 +123,8 @@ git push origin test/workflow-validation
 
 ```bash
 # Create a test release branch
-git checkout pre-release
-git pull origin pre-release
+git checkout develop
+git pull origin develop
 git checkout -b release/99.99.99
 git push origin release/99.99.99
 ```
@@ -137,13 +137,13 @@ git push origin release/99.99.99
 
 ```bash
 # Create a test feature branch
-git checkout pre-release
+git checkout develop
 git checkout -b feature/should-fail-validation
 git push origin feature/should-fail-validation
 ```
 
 1. Open a PR from `feature/should-fail-validation` to `main`
-2. ✅ The PR should be auto-retargeted to `pre-release` immediately
+2. ✅ The PR should be auto-retargeted to `develop` immediately
 3. If you manually change it back to target `main`:
    - ✅ The `validate-pr-target` check should **fail** (red X)
    - ✅ The error message should explain the requirement
@@ -153,7 +153,7 @@ git push origin feature/should-fail-validation
 
 ### For Contributors
 
-- **Feature/Bug Fix PRs**: Target `pre-release` branch
+- **Feature/Bug Fix PRs**: Target `develop` branch
   - If accidentally targeting `main`, PR will be auto-retargeted
   
 - **Release PRs**: Create from `release/x.y.z` branch to `main`
@@ -164,13 +164,13 @@ git push origin feature/should-fail-validation
 ### For Maintainers
 
 **Release Process**:
-1. Ensure `pre-release` has all changes for the release
-2. Create a release branch: `git checkout -b release/x.y.z pre-release`
+1. Ensure `develop` has all changes for the release
+2. Create a release branch: `git checkout -b release/x.y.z develop`
 3. Update version numbers using `bump2version`
 4. Push release branch: `git push origin release/x.y.z`
 5. Open PR from `release/x.y.z` to `main`
 6. After PR is merged, tag the release on `main`
-7. Merge `main` back to `pre-release` to keep them in sync
+7. Merge `main` back to `develop` to keep them in sync
 
 ## Troubleshooting
 
@@ -211,6 +211,6 @@ For issues or questions:
 
 ## Related Files
 
-- `.github/workflows/retarget-pr-to-pre-release.yml` - Auto-retargeting logic
+- `.github/workflows/retarget-pr-to-develop.yml` - Auto-retargeting logic
 - `.github/workflows/validate-pr-target.yml` - Release branch validation
 - `.github/pull_request_template.md` - Contributor guidance

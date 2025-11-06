@@ -1,4 +1,4 @@
-name: Retarget PR to Pre-Release
+name: Retarget PR to Develop
 
 on:
   pull_request_target:
@@ -19,26 +19,26 @@ jobs:
       !startsWith(github.event.pull_request.head.ref, 'release/')
     
     steps:
-      - name: Retarget PR to pre-release
+      - name: Retarget PR to develop
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const pr = context.payload.pull_request;
             
-            // Check if PR is already targeting pre-release (avoid loops)
-            if (pr.base.ref === 'pre-release') {
-              console.log('PR already targets pre-release, skipping.');
+            // Check if PR is already targeting develop (avoid loops)
+            if (pr.base.ref === 'develop') {
+              console.log('PR already targets develop, skipping.');
               return;
             }
             
             try {
-              // Update the PR base to pre-release
+              // Update the PR base to develop
               await github.rest.pulls.update({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 pull_number: pr.number,
-                base: 'pre-release'
+                base: 'develop'
               });
               
               // Post a comment explaining the retarget
@@ -46,9 +46,9 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: pr.number,
-                body: `👋 This PR has been automatically retargeted from \`main\` to \`pre-release\`.
+                body: `👋 This PR has been automatically retargeted from \`main\` to \`develop\`.
                 
-            **Why?** Feature branches and standard development work should target \`pre-release\`, not \`main\`.
+            **Why?** Feature branches and standard development work should target \`develop\`, not \`main\`.
             
             **The \`main\` branch** is reserved for release PRs from \`release/*\` branches only.
             
@@ -59,7 +59,7 @@ jobs:
             For more information, see our [contributing guidelines](.github/pull_request_template.md).`
               });
               
-              console.log(`Successfully retargeted PR #${pr.number} to pre-release`);
+              console.log(`Successfully retargeted PR #${pr.number} to develop`);
             } catch (error) {
               console.error('Failed to retarget PR:', error);
               core.setFailed(`Failed to retarget PR: ${error.message}`);

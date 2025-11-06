@@ -13,7 +13,7 @@ release/x.y.z (version bump, final testing)
   ↑
   | (merge when ready for release)
   |
-pre-release (integration, tested features)
+develop (integration, tested features)
   ↑
   | (all feature/bug PRs go here)
   |
@@ -26,21 +26,21 @@ feature/*, bugfix/*, etc. (development work)
 
 ```mermaid
 graph TB
-    A[Developer creates feature branch] --> B[Open PR to pre-release]
+    A[Developer creates feature branch] --> B[Open PR to develop]
     B --> C{CI Checks Pass?}
     C -->|Yes| D[Code Review]
     C -->|No| E[Fix Issues]
     E --> B
-    D -->|Approved| F[Merge to pre-release]
+    D -->|Approved| F[Merge to develop]
     D -->|Changes Requested| E
-    F --> G[Feature available in pre-release]
+    F --> G[Feature available in develop]
 ```
 
 ### Release Process Flow
 
 ```mermaid
 graph TB
-    A[pre-release ready for release] --> B[Create release/x.y.z branch]
+    A[develop ready for release] --> B[Create release/x.y.z branch]
     B --> C[Run bump2version]
     C --> D[Open PR to main]
     D --> E{validate-pr-target check}
@@ -50,7 +50,7 @@ graph TB
     F -->|No| I[Fix Issues]
     I --> D
     H --> J[Tag release on main]
-    J --> K[Merge main back to pre-release]
+    J --> K[Merge main back to develop]
     K --> L[Delete release branch]
 ```
 
@@ -60,21 +60,21 @@ graph TB
 graph TB
     A[Developer opens PR to main] --> B{From release/* branch?}
     B -->|Yes| C[✅ validate-pr-target passes]
-    B -->|No| D[🤖 Auto-retarget to pre-release]
+    B -->|No| D[🤖 Auto-retarget to develop]
     D --> E[Comment posted explaining change]
-    E --> F[PR now targets pre-release]
+    E --> F[PR now targets develop]
     C --> G[PR proceeds to merge process]
 ```
 
 ## Automated Workflows
 
-### 1. Retarget PR to Pre-Release (`retarget-pr-to-pre-release.yml`)
+### 1. Retarget PR to Pre-Release (`retarget-pr-to-develop.yml`)
 
 **Trigger**: When a PR is opened/reopened/edited targeting `main`
 
 **Behavior**:
 - ✅ **IF** PR is from a `release/*` branch → No action (allow it)
-- 🤖 **ELSE** → Automatically change base branch to `pre-release` and post comment
+- 🤖 **ELSE** → Automatically change base branch to `develop` and post comment
 
 **Purpose**: Prevent accidental merges to `main` from feature branches
 
@@ -97,9 +97,9 @@ graph TB
   - All CI checks must pass
   - Only accepts PRs from `release/*` branches
 - **Merges from**: `release/*` branches only
-- **Merges to**: `pre-release` (to sync after release)
+- **Merges to**: `develop` (to sync after release)
 
-### `pre-release`
+### `develop`
 - **Purpose**: Integration branch for tested features
 - **Protection** (recommended):
   - All CI checks must pass
@@ -111,32 +111,32 @@ graph TB
 - **Purpose**: Final preparation for production release
 - **Naming**: `release/x.y.z` (semantic versioning)
 - **Lifecycle**:
-  1. Branch from `pre-release`
+  1. Branch from `develop`
   2. Run `bump2version` to update version
   3. Final testing and bug fixes
   4. Open PR to `main`
   5. After merge, delete branch
-- **Merges from**: `pre-release`
+- **Merges from**: `develop`
 - **Merges to**: `main` only
 
 ### `feature/*`, `bugfix/*`, etc.
 - **Purpose**: Development work
 - **Lifecycle**:
-  1. Branch from `pre-release`
+  1. Branch from `develop`
   2. Develop and test locally
-  3. Open PR to `pre-release`
+  3. Open PR to `develop`
   4. After merge, delete branch
-- **Merges from**: `pre-release`
-- **Merges to**: `pre-release`
+- **Merges from**: `develop`
+- **Merges to**: `develop`
 
 ## Examples
 
 ### Example 1: Adding a New Feature
 
 ```bash
-# Start from pre-release
-git checkout pre-release
-git pull origin pre-release
+# Start from develop
+git checkout develop
+git pull origin develop
 
 # Create feature branch
 git checkout -b feature/new-token-type
@@ -145,17 +145,17 @@ git checkout -b feature/new-token-type
 git add .
 git commit -m "Add new token type T6"
 
-# Push and open PR to pre-release
+# Push and open PR to develop
 git push origin feature/new-token-type
-# Open PR on GitHub: feature/new-token-type → pre-release
+# Open PR on GitHub: feature/new-token-type → develop
 ```
 
 ### Example 2: Making a Release
 
 ```bash
-# Ensure pre-release is up to date
-git checkout pre-release
-git pull origin pre-release
+# Ensure develop is up to date
+git checkout develop
+git pull origin develop
 
 # Create release branch
 git checkout -b release/1.5.0
@@ -173,10 +173,10 @@ git pull
 git tag v1.5.0
 git push origin v1.5.0
 
-# Sync main back to pre-release
-git checkout pre-release
+# Sync main back to develop
+git checkout develop
 git merge main
-git push origin pre-release
+git push origin develop
 
 # Clean up release branch
 git push origin --delete release/1.5.0
@@ -188,25 +188,25 @@ git branch -d release/1.5.0
 ```bash
 # Developer mistakenly opens PR: feature/my-work → main
 # 🤖 GitHub Actions automatically:
-#    1. Changes base to: feature/my-work → pre-release
+#    1. Changes base to: feature/my-work → develop
 #    2. Posts comment explaining the change
-# ✅ Developer continues with the PR to pre-release
+# ✅ Developer continues with the PR to develop
 ```
 
 ## FAQ
 
 **Q: Why can't I open a PR to `main` from my feature branch?**  
-A: Feature work should go to `pre-release` first. Only release branches can merge to `main`. This ensures `main` is always stable and production-ready.
+A: Feature work should go to `develop` first. Only release branches can merge to `main`. This ensures `main` is always stable and production-ready.
 
 **Q: My PR was auto-retargeted. Is this normal?**  
-A: Yes! If you opened a PR to `main` from a non-release branch, it's automatically retargeted to `pre-release`. This is by design.
+A: Yes! If you opened a PR to `main` from a non-release branch, it's automatically retargeted to `develop`. This is by design.
 
 **Q: How do I make a hotfix?**  
 A: Hotfixes follow the same process as releases:
-1. Create a `release/x.y.z` branch from `pre-release` (or `main` if urgent)
+1. Create a `release/x.y.z` branch from `develop` (or `main` if urgent)
 2. Apply the fix and bump version
 3. Open PR to `main`
-4. After merge, sync back to `pre-release`
+4. After merge, sync back to `develop`
 
 **Q: What if I need to merge to `main` for an emergency?**  
 A: Create a `release/hotfix-x.y.z` branch. The branch name must start with `release/` to pass validation.
@@ -219,5 +219,5 @@ A: Repository admins can override branch protection, but it's strongly discourag
 - [Branch Protection Setup Guide](BRANCH_PROTECTION_SETUP.md) - Admin setup instructions
 - [Pull Request Template](pull_request_template.md) - Contributor guidance
 - Workflow files:
-  - [retarget-pr-to-pre-release.yml](workflows/retarget-pr-to-pre-release.yml)
+  - [retarget-pr-to-develop.yml](workflows/retarget-pr-to-develop.yml)
   - [validate-pr-target.yml](workflows/validate-pr-target.yml)

@@ -11,20 +11,20 @@
 
 ## Target Branch Guidelines
 
-### 🎯 Standard Development Work → `pre-release`
-Most PRs should target the **`pre-release`** branch:
+### 🎯 Standard Development Work → `develop`
+Most PRs should target the **`develop`** branch:
 - New features
 - Bug fixes
 - Documentation updates
 - Refactoring
 - Test improvements
 
-**If you opened this PR against `main` by mistake**, it will be automatically retargeted to `pre-release`.
+**If you opened this PR against `main` by mistake**, it will be automatically retargeted to `develop`.
 
 ### 🚀 Release PRs → `main`
 PRs to **`main`** are restricted to release branches only:
 - Must come from a `release/x.y.z` branch (e.g., `release/1.2.3`)
-- Used only for promoting tested code from `pre-release` to `main`
+- Used only for promoting tested code from `develop` to `main`
 - Triggers production releases
 
 **Important:** If your PR to `main` is not from a `release/*` branch, the `validate-pr-target` status check will fail, blocking the merge.
@@ -39,7 +39,7 @@ PRs to **`main`** are restricted to release branches only:
 - [ ] I have added tests that prove my fix is effective or that my feature works
 - [ ] New and existing unit tests pass locally with my changes
 - [ ] I have updated the version number using `bump2version` (if applicable)
-- [ ] I am targeting the correct branch (`pre-release` for development, `main` only for releases)
+- [ ] I am targeting the correct branch (`develop` for development, `main` only for releases)
 
 ## Testing
 <!-- Describe the tests you ran and how to reproduce them -->
