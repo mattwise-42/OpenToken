@@ -214,3 +214,49 @@ For issues or questions:
 - `.github/workflows/retarget-pr-to-develop.yml` - Auto-retargeting logic
 - `.github/workflows/validate-pr-target.yml` - Release branch validation
 - `.github/pull_request_template.md` - Contributor guidance
+
+## Automated Release Workflows
+
+Two additional workflows automate the release process:
+
+### Auto Version Bump
+
+When you open a PR from a `release/*` branch to `main`, the version is automatically updated:
+
+1. The workflow extracts the version from the branch name (e.g., `release/1.12.0` → `1.12.0`)
+2. Validates the version format (must be semantic versioning: `x.y.z`)
+3. Updates all version files via bump2version
+4. Commits the changes to your release branch
+5. Comments on the PR to confirm the update
+
+**No manual `bump2version` command needed!**
+
+### Auto Release Creation
+
+When a release PR is merged to `main`, a GitHub release is automatically created:
+
+1. Creates a git tag (e.g., `v1.12.0`)
+2. Generates release notes automatically
+3. Creates the GitHub release
+4. Triggers Docker and Maven publish workflows
+5. Creates a PR to sync `main` back to `develop`
+
+**No manual release creation or branch syncing needed!**
+
+### Updated Workflow
+
+With automation, your release process becomes:
+
+```bash
+# 1. Create release branch
+git checkout develop
+git checkout -b release/1.12.0
+git push origin release/1.12.0
+
+# 2. Open PR to main on GitHub
+# 3. Review auto-generated version changes
+# 4. Approve and merge
+
+# Done! Everything else is automated.
+```
+

@@ -221,3 +221,81 @@ A: Repository admins can override branch protection, but it's strongly discourag
 - Workflow files:
   - [retarget-pr-to-develop.yml](workflows/retarget-pr-to-develop.yml)
   - [validate-pr-target.yml](workflows/validate-pr-target.yml)
+
+## Automated Workflows
+
+### Auto Version Bump (`auto-version-bump.yml`)
+
+**Trigger**: When a PR from a `release/*` branch is opened/updated targeting `main`
+
+**Behavior**:
+- Extracts version number from branch name (e.g., `release/1.12.0` → `1.12.0`)
+- Validates version format (must be `x.y.z`)
+- Checks if version needs updating
+- If needed:
+  - Updates `.bumpversion.cfg` and all version files
+  - Commits changes to the release branch
+  - Posts comment on PR confirming update
+- If already up-to-date: Posts comment confirming no update needed
+
+**Purpose**: Eliminates manual version bumping step
+
+### Auto Release Creation (`auto-release.yml`)
+
+**Trigger**: When code is pushed to `main` (after PR merge)
+
+**Behavior**:
+- Detects if push was from a release branch merge
+- Reads version from `.bumpversion.cfg`
+- Creates git tag (e.g., `v1.12.0`)
+- Creates GitHub release with auto-generated release notes
+- Creates PR to merge `main` back to `develop` (sync)
+- Attempts auto-merge of sync PR
+
+**Purpose**: Automates release creation and branch synchronization
+
+## Updated Release Process (Automated)
+
+### Example 2b: Making a Release (With Automation)
+
+```bash
+# Ensure develop is up to date
+git checkout develop
+git pull origin develop
+
+# Create release branch with version number
+git checkout -b release/1.5.0
+
+# Push release branch
+git push origin release/1.5.0
+
+# Open PR on GitHub: release/1.5.0 → main
+# 🤖 Auto version bump workflow runs:
+#    - Detects version 1.5.0 from branch name
+#    - Updates all version files automatically
+#    - Commits changes to release/1.5.0
+#    - Adds comment to PR
+
+# After approval and CI passes, merge PR to main
+# 🤖 Auto release workflow runs:
+#    - Creates tag v1.5.0
+#    - Creates GitHub release with auto-generated notes
+#    - Creates PR: main → develop (sync)
+#    - Attempts to auto-merge sync PR
+
+# Done! No manual version bumping or release creation needed
+```
+
+**What happens automatically:**
+1. ✅ Version files updated based on branch name
+2. ✅ Git tag created on main
+3. ✅ GitHub release created with notes
+4. ✅ Docker and Maven packages published (via existing workflows)
+5. ✅ Main synced back to develop
+
+**What you still do manually:**
+- Create the `release/x.y.z` branch
+- Open the PR to main
+- Review and approve the PR
+- Merge the PR (or set up auto-merge)
+
