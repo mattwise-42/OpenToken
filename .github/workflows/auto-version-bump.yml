@@ -47,6 +47,7 @@ jobs:
           # Parse current version from Python package __init__.py
           CURRENT_VERSION=$(python3 <<'EOF'
           import re
+          import sys
           try:
               with open('lib/python/src/main/opentoken/__init__.py', 'r') as f:
                   content = f.read()
@@ -54,9 +55,14 @@ jobs:
               if match:
                   print(match.group(1))
               else:
-                  print('')
-          except Exception:
-              print('')
+                  print('', file=sys.stderr)
+                  print('ERROR: No __version__ found in file', file=sys.stderr)
+          except (FileNotFoundError, IOError) as e:
+              print('', file=sys.stderr)
+              print(f'ERROR: Cannot read file: {e}', file=sys.stderr)
+          except Exception as e:
+              print('', file=sys.stderr)
+              print(f'ERROR: Unexpected error: {e}', file=sys.stderr)
           EOF
           )
           
