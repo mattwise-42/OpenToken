@@ -2,6 +2,8 @@ title: OpenToken Documentation
 description: Privacy-preserving person matching using cryptographically secure token generation
 baseurl: "/OpenToken"
 url: "https://mattwise-42.github.io"
+github:
+  repository_url: "https://github.com/mattwise-42/OpenToken"
 
 # Markdown settings
 markdown: kramdown

@@ -4,7 +4,7 @@ This directory contains the documentation for OpenToken that is published to Git
 
 ## Documentation Site
 
-The documentation is available at: [https://mattwise-42.github.io/OpenToken](https://mattwise-42.github.io/OpenToken)
+The documentation is available at: [GitHub Pages](https://mattwise-42.github.io/OpenToken)
 
 ## Contents
 
