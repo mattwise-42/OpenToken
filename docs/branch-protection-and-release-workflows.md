@@ -155,7 +155,7 @@ git push origin feature/your-feature
 
 ### auto-release.yml
 
-**Trigger**: Push to `main` branch
+**Trigger**: PR merged to `main` from `release/*` branch
 
 **Actions**:
 1. Extracts version from `.bumpversion.cfg`
