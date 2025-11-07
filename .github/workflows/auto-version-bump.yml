@@ -44,7 +44,27 @@ jobs:
       - name: Check current version
         id: check_version
         run: |
-          CURRENT_VERSION=$(grep "current_version" .bumpversion.cfg | cut -d'=' -f2 | tr -d ' ')
+          # Parse current version from Python package __init__.py
+          CURRENT_VERSION=$(python3 <<'EOF'
+          import re
+          try:
+              with open('lib/python/src/main/opentoken/__init__.py', 'r') as f:
+                  content = f.read()
+              match = re.search(r'__version__\s*=\s*["\']([^"\']+)["\']', content)
+              if match:
+                  print(match.group(1))
+              else:
+                  print('')
+          except Exception:
+              print('')
+          EOF
+          )
+          
+          if [ -z "$CURRENT_VERSION" ]; then
+            echo "ERROR: Could not parse current version from lib/python/src/main/opentoken/__init__.py"
+            exit 1
+          fi
+          
           TARGET_VERSION="${{ steps.extract_version.outputs.version }}"
           
           echo "current=$CURRENT_VERSION" >> $GITHUB_OUTPUT
