@@ -149,7 +149,6 @@ graph TB
      - Body: Auto-generated release notes
    - Creates PR to merge `main` back to `develop` (keeps branches in sync)
    - Attempts auto-merge of sync PR
-4. Posts comment on PR summarizing release creation
 
 ## Release Process Examples
 
