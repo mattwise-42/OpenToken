@@ -136,7 +136,7 @@ graph TB
 
 ### auto-release.yml
 
-**Trigger**: Any push to `main` branch
+**Trigger**: PR merged to `main` from `release/*` branch
 
 **Actions**:
 1. Extracts version from `.bumpversion.cfg`
