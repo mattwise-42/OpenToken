@@ -50,7 +50,7 @@ jobs:
           try:
               with open('lib/python/src/main/opentoken/__init__.py', 'r') as f:
                   content = f.read()
-              match = re.search(r'__version__\s*=\s*["\']([^"\']+)["\']', content)
+              match = re.search(r'__version__\s*=\s*["\']([0-9]+\.[0-9]+\.[0-9]+(?:[^"\']*)?)["\']', content)
               if match:
                   print(match.group(1))
               else:
