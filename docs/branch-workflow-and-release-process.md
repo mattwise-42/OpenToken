@@ -234,7 +234,7 @@ A: No! The `auto-version-bump` workflow extracts the version from your `release/
 
 **Q: How do I make a hotfix?**  
 A: Hotfixes follow the same process as releases:
-1. Create a `release/hotfix-x.y.z` branch from `main` (or `develop` depending on urgency)
+1. Create a `release/x.y.z-hotfix` branch from `main` (or `develop` depending on urgency). The branch name must start with `release/` and include the version number for automation to work.
 2. Push the branch to GitHub
 3. Open PR to `main`
 4. The workflows handle the rest
