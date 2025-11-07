@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     # Only run for release branches
     if: startsWith(github.event.pull_request.head.ref, 'release/')
-    
+
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v4
@@ -23,35 +23,35 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
-      
+
       - name: Extract version from branch name
         id: extract_version
         run: |
           BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
           # Extract version from release/x.y.z format
           VERSION=$(echo "$BRANCH_NAME" | sed 's|release/||')
-          
+
           # Validate version format (x.y.z)
           if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "Error: Branch name must be in format release/x.y.z (e.g., release/1.12.0)"
             echo "Got: $BRANCH_NAME"
             exit 1
           fi
-          
+
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Extracted version: $VERSION"
-      
+
       - name: Check current version
         id: check_version
         run: |
           CURRENT_VERSION=$(grep "current_version" .bumpversion.cfg | cut -d'=' -f2 | tr -d ' ')
           TARGET_VERSION="${{ steps.extract_version.outputs.version }}"
-          
+
           echo "current=$CURRENT_VERSION" >> $GITHUB_OUTPUT
           echo "target=$TARGET_VERSION" >> $GITHUB_OUTPUT
           echo "Current version: $CURRENT_VERSION"
           echo "Target version: $TARGET_VERSION"
-          
+
           if [ "$CURRENT_VERSION" = "$TARGET_VERSION" ]; then
             echo "needs_update=false" >> $GITHUB_OUTPUT
             echo "Version is already up to date!"
@@ -59,38 +59,38 @@ jobs:
             echo "needs_update=true" >> $GITHUB_OUTPUT
             echo "Version needs to be updated"
           fi
-      
+
       - name: Set up Python
         if: steps.check_version.outputs.needs_update == 'true'
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
-      
+          python-version: "3.10"
+
       - name: Install bump2version
         if: steps.check_version.outputs.needs_update == 'true'
         run: pip install bump2version
-      
+
       - name: Update version
         if: steps.check_version.outputs.needs_update == 'true'
         run: |
           VERSION="${{ steps.extract_version.outputs.version }}"
-          
+
           # Use bump2version with --new-version to set the exact version
-          bump2version --new-version "$VERSION" --allow-dirty patch --no-commit --no-tag
-          
+          bump2version --new-version "$VERSION" --allow-dirty --no-commit --no-tag
+
           echo "Updated version to $VERSION"
-      
+
       - name: Configure Git
         if: steps.check_version.outputs.needs_update == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-      
+
       - name: Commit version changes
         if: steps.check_version.outputs.needs_update == 'true'
         run: |
           VERSION="${{ steps.extract_version.outputs.version }}"
-          
+
           # Check if there are changes to commit
           if [[ -n $(git status -s) ]]; then
             git add .
@@ -100,7 +100,7 @@ jobs:
           else
             echo "No changes to commit"
           fi
-      
+
       - name: Add comment to PR
         if: steps.check_version.outputs.needs_update == 'true'
         uses: actions/github-script@v7
@@ -125,7 +125,7 @@ jobs:
               
               Please review the changes before merging.`
             });
-      
+
       - name: Version already up-to-date comment
         if: steps.check_version.outputs.needs_update == 'false'
         uses: actions/github-script@v7
