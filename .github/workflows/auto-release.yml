@@ -25,10 +25,10 @@ jobs:
         id: get_version
         run: |
           set -euo pipefail
-          
+
           # Get version from .bumpversion.cfg - only the [bumpversion] section
           VERSION=$(sed -n '/^\[bumpversion\]/,/^\[/p' .bumpversion.cfg | grep "^current_version" | cut -d'=' -f2 | tr -d ' ')
-          
+
           # sanitize against characters that will break GITHUB_OUTPUT (angle brackets, CRs, newlines)
           SAFE_VERSION=$(printf '%s' "$VERSION" | tr -d '<>' | tr -d $'\r' | tr -d $'\n')
           if [ -z "$SAFE_VERSION" ]; then
