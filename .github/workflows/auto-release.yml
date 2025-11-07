@@ -1,15 +1,9 @@
 name: Create Release on Merge
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: "Version to release (e.g., 1.23.4)"
-        required: true
-  pull_request:
-    types: [closed]
+  push:
     branches:
-      - main
+      - dev/mattwise-42/fix-release-pipeline
 
 permissions:
   contents: write
@@ -18,12 +12,8 @@ permissions:
 jobs:
   create-release:
     runs-on: ubuntu-latest
-    # Only run if:
-    # 1. Manual trigger (workflow_dispatch) OR
-    # 2. PR was merged from a release branch
-    if: |
-      github.event_name == 'workflow_dispatch' || 
-      (github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release/'))
+    # Always run on this branch (push trigger already filters)
+    if: always()
 
     steps:
       - name: Checkout code
@@ -35,27 +25,20 @@ jobs:
         id: get_version
         run: |
           set -euo pipefail
-
-          # Check if version was provided via workflow_dispatch input
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            VERSION="${{ github.event.inputs.version }}"
-          else
-            # Get version from .bumpversion.cfg for PR trigger
-            VERSION=$(awk -F= '/current_version/ { gsub(/^[ \t]+|[ \t]+$/,"", $2); gsub(/"/,"",$2); print $2 }' .bumpversion.cfg)
-          fi
-
+          
+          # Get version from .bumpversion.cfg
+          VERSION=$(awk -F= '/current_version/ { gsub(/^[ \t]+|[ \t]+$/,"", $2); gsub(/"/,"",$2); print $2 }' .bumpversion.cfg)
+          
           # sanitize against characters that will break GITHUB_OUTPUT (angle brackets, CRs, newlines)
           SAFE_VERSION=$(printf '%s' "$VERSION" | tr -d '<>' | tr -d $'\r' | tr -d $'\n')
           if [ -z "$SAFE_VERSION" ]; then
-            echo "Failed to determine a valid version" >&2
+            echo "Failed to determine a valid version from .bumpversion.cfg" >&2
             exit 1
           fi
           echo "version=${SAFE_VERSION}" >> "$GITHUB_OUTPUT"
           echo "tag=v${SAFE_VERSION}" >> "$GITHUB_OUTPUT"
           echo "Version: ${SAFE_VERSION}"
-          echo "Tag: v${SAFE_VERSION}"
-
-      - name: Check if tag exists
+          echo "Tag: v${SAFE_VERSION}"      - name: Check if tag exists
         id: check_tag
         run: |
           TAG="v${{ steps.get_version.outputs.version }}"
