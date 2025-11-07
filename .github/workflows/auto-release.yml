@@ -17,23 +17,30 @@ jobs:
     if: |
       github.event.pull_request.merged == true &&
       startsWith(github.event.pull_request.head.ref, 'release/')
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - name: Get version
         id: get_version
         run: |
+          set -euo pipefail
           # Get version from .bumpversion.cfg
-          VERSION=$(grep "current_version" .bumpversion.cfg | cut -d'=' -f2 | tr -d ' ')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
-          echo "Version: $VERSION"
-          echo "Tag: v$VERSION"
-      
+          VERSION=$(awk -F= '/current_version/ { gsub(/^[ \t]+|[ \t]+$/,"", $2); gsub(/"/,"",$2); print $2 }' .bumpversion.cfg)
+          # sanitize against characters that will break GITHUB_OUTPUT (angle brackets, CRs, newlines)
+          SAFE_VERSION=$(printf '%s' "$VERSION" | tr -d '<>' | tr -d $'\r' | tr -d $'\n')
+          if [ -z "$SAFE_VERSION" ]; then
+            echo "Failed to determine a valid version from .bumpversion.cfg" >&2
+            exit 1
+          fi
+          echo "version=${SAFE_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=v${SAFE_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Version: ${SAFE_VERSION}"
+          echo "Tag: v${SAFE_VERSION}"
+
       - name: Check if tag exists
         id: check_tag
         run: |
@@ -45,7 +52,7 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT
             echo "Tag $TAG does not exist"
           fi
-      
+
       - name: Check if release exists
         id: check_release
         if: steps.check_tag.outputs.exists == 'false'
@@ -69,7 +76,7 @@ jobs:
                 throw error;
               }
             }
-      
+
       - name: Create GitHub Release
         if: steps.check_tag.outputs.exists == 'false' && steps.check_release.outputs.exists == 'false'
         uses: actions/github-script@v7
@@ -77,10 +84,10 @@ jobs:
           script: |
             const version = '${{ steps.get_version.outputs.version }}';
             const tag = 'v' + version;
-            
+
             // Get the commit SHA
             const sha = context.sha;
-            
+
             // Create the tag
             try {
               await github.rest.git.createRef({
@@ -94,7 +101,7 @@ jobs:
               console.log(`Tag creation error: ${error.message}`);
               // Tag might already exist, continue anyway
             }
-            
+
             // Generate release notes
             let releaseNotes = '';
             try {
@@ -108,7 +115,7 @@ jobs:
               console.log(`Could not generate release notes: ${error.message}`);
               releaseNotes = `Release ${version}`;
             }
-            
+
             // Create the release
             const release = await github.rest.repos.createRelease({
               owner: context.repo.owner,
@@ -119,10 +126,10 @@ jobs:
               draft: false,
               prerelease: false
             });
-            
+
             console.log(`Created release: ${release.data.html_url}`);
             core.setOutput('release_url', release.data.html_url);
-      
+
       - name: Merge main back to develop
         if: steps.check_tag.outputs.exists == 'false' && steps.check_release.outputs.exists == 'false'
         uses: actions/github-script@v7
@@ -175,7 +182,7 @@ jobs:
               console.log(`Error in merge back process: ${error.message}`);
               // Don't fail the workflow if merge back fails
             }
-      
+
       - name: Summary
         if: steps.check_tag.outputs.exists == 'false' && steps.check_release.outputs.exists == 'false'
         run: |
