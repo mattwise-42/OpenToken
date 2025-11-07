@@ -8,7 +8,9 @@ This guide centralizes contributor-facing information. It covers local setup, la
 - Deterministic token generation logic is equivalent across languages
 - Use this guide for environment setup & day‑to‑day development
 - Use the Token & Attribute Registration guide for extending functionality
-- Workflow documentation: See [Branch Workflow and Release Process](./branch-workflow-and-release-process.md) for release/PR workflows and [Branch Protection and Release Workflows](./branch-protection-and-release-workflows.md) for admin setup
+- Workflow documentation:
+  - [Branch Workflow and Release Process](./branch-workflow-and-release-process.md) – Release/PR workflows
+  - [Branch Protection and Release Workflows](./branch-protection-and-release-workflows.md) – Admin setup
 
 ## Contents
 
