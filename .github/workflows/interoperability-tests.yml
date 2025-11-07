@@ -39,6 +39,7 @@ jobs:
           if [ -f dev-requirements.txt ]; then
             pip install -r dev-requirements.txt
           fi
+          pip install -e .
 
       - name: Install Interoperability Test Dependencies
         run: |
@@ -64,7 +65,7 @@ jobs:
           python java_python_interoperability_test.py
           echo "Interoperability tests completed"
         env:
-          PYTHONPATH: ${{ github.workspace }}/lib/python/src/main
+          PYTHONPATH: ${{ github.workspace }}/lib/python/opentoken/src/main
 
       - name: Archive Test Results
         if: always()

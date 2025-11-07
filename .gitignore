@@ -55,3 +55,12 @@ __pycache__/
 .venv/
 venv/
 *.egg-info/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# PySpark
+spark-warehouse/
+metastore_db/
+derby.log
