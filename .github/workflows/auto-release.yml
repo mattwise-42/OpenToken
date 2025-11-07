@@ -1,7 +1,8 @@
 name: Create Release on Merge
 
 on:
-  push:
+  pull_request:
+    types: [closed]
     branches:
       - main
 
@@ -12,11 +13,10 @@ permissions:
 jobs:
   create-release:
     runs-on: ubuntu-latest
-    # Only run if the commit message indicates it's from a release branch merge
-    # (automated sync PRs from auto-release itself will have specific message patterns)
+    # Only run if PR was merged and came from a release branch
     if: |
-      contains(github.event.head_commit.message, 'Merge pull request') &&
-      contains(github.event.head_commit.message, 'release/')
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.head.ref, 'release/')
 
     steps:
       - name: Checkout code
@@ -29,8 +29,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Get version from .bumpversion.cfg
-          VERSION=$(awk -F= '/current_version/ { gsub(/^[ \t]+|[ \t]+$/,"", $2); gsub(/"/,"",$2); print $2 }' .bumpversion.cfg)
+          # Get version from .bumpversion.cfg - only the [bumpversion] section
+          VERSION=$(sed -n '/^\[bumpversion\]/,/^\[/p' .bumpversion.cfg | grep "^current_version" | cut -d'=' -f2 | tr -d ' ')
 
           # sanitize against characters that will break GITHUB_OUTPUT (angle brackets, CRs, newlines)
           SAFE_VERSION=$(printf '%s' "$VERSION" | tr -d '<>' | tr -d $'\r' | tr -d $'\n')
