@@ -38,7 +38,9 @@ jobs:
           echo "version=${SAFE_VERSION}" >> "$GITHUB_OUTPUT"
           echo "tag=v${SAFE_VERSION}" >> "$GITHUB_OUTPUT"
           echo "Version: ${SAFE_VERSION}"
-          echo "Tag: v${SAFE_VERSION}"      - name: Check if tag exists
+          echo "Tag: v${SAFE_VERSION}"
+
+      - name: Check if tag exists
         id: check_tag
         run: |
           TAG="v${{ steps.get_version.outputs.version }}"
