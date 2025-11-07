@@ -25,8 +25,8 @@ The `develop` branch serves as the primary development branch where all feature 
 #### Option A: Command Line
 
 ```bash
-git clone https://github.com/mattwise-42/OpenToken.git
-cd OpenToken
+git clone https://github.com/<your-org>/<your-repo>.git
+cd <your-repo>
 git checkout main
 git pull origin main
 git checkout -b develop
