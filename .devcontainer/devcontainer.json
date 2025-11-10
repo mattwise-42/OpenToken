@@ -42,7 +42,8 @@
                 "GitHub.vscode-github-actions",
                 "GitHub.copilot-chat",
                 "ms-python.python",
-                "ms-toolsai.jupyter"
+                "ms-toolsai.jupyter",
+                "bierner.markdown-mermaid"
             ],
             "settings": {
                 "sonarlint.ls.javaHome": "/usr/local/sdkman/candidates/java/17.0.16-ms"
