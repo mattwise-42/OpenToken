@@ -12,11 +12,11 @@ This guide centralizes contributor-facing information. It covers local setup, la
   - [Branch Workflow and Release Process](./branch-workflow-and-release-process.md) – Release/PR workflows
   - [Branch Protection and Release Workflows](./branch-protection-and-release-workflows.md) – Admin setup
 
-## Contents
+## Table of Contents
 
 - [OpenToken Development Guide](#opentoken-development-guide)
   - [At a Glance](#at-a-glance)
-  - [Contents](#contents)
+  - [Table of Contents](#table-of-contents)
   - [Prerequisites](#prerequisites)
   - [Project Layout](#project-layout)
   - [Language Development (Java \& Python)](#language-development-java--python)

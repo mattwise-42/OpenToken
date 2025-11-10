@@ -5,19 +5,19 @@ This document explains the branch strategy and automated workflows for the OpenT
 ## Branch Structure
 
 ```
-main (stable, production-ready)
-  ↑
-  | (only from release/* branches)
-  |
-release/x.y.z (version bump, final testing)
-  ↑
-  | (merge when ready for release)
-  |
-develop (integration, tested features)
-  ↑
+feature/*, bugfix/*, etc. (development work)
+  ↓
   | (all feature/bug PRs go here)
   |
-feature/*, bugfix/*, etc. (development work)
+develop (integration, tested features)
+  ↓
+  | (merge when ready for release)
+  |
+release/x.y.z (version bump, final testing)
+  ↓
+  | (only from release/* branches)
+  |
+main (stable, production-ready)
 ```
 
 ## Workflow Diagrams
