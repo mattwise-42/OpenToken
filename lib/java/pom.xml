@@ -21,7 +21,7 @@
     </distributionManagement>
 
     <properties>
-        <revision>1.24.0</revision>
+        <revision>2.0.1</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>11</java.version>
         <maven.compiler.release>${java.version}</maven.compiler.release>
