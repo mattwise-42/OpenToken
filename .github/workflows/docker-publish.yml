@@ -96,3 +96,33 @@ jobs:
         # This step uses the identity token to provision an ephemeral certificate
         # against the sigstore community Fulcio instance.
         run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
+
+      - name: Upload Docker image details to release
+        if: github.event_name == 'release'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const release = context.payload.release;
+
+            if (!release) {
+              console.log('No release found in payload, skipping upload');
+              return;
+            }
+
+            const imageName = context.repo.repo;
+            const version = '${{ env.VERSION }}';
+            const registry = '${{ env.REGISTRY }}';
+            const fullImage = `${registry}/${{ github.repository }}:${version}`;
+            const digest = '${{ steps.build-and-push.outputs.digest }}';
+
+            const imageInfoContent = `# Docker Image Information\n\nImage: ${fullImage}\nDigest: ${digest}\nRegistry: ${registry}\n`;
+
+            const releaseBody = release.body + `\n\n---\n\n## Docker Image\n\n\`\`\`\n${fullImage}\n\`\`\`\n\nDigest: \`${digest}\`\n`;
+
+            await github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: release.id,
+              body: releaseBody
+            });
+            console.log(`Updated release with Docker image information`);

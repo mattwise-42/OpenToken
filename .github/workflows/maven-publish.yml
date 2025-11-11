@@ -33,3 +33,41 @@ jobs:
         run: cd lib/java && mvn deploy -s $GITHUB_WORKSPACE/settings.xml
         env:
           GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Upload Maven artifacts to release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const artifactDir = 'lib/java/target';
+            const release = context.payload.release;
+
+            if (!release) {
+              console.log('No release found in payload, skipping artifact upload');
+              return;
+            }
+
+            if (!fs.existsSync(artifactDir)) {
+              console.log('No artifacts directory found');
+              return;
+            }
+
+            const files = fs.readdirSync(artifactDir).filter(f => 
+              (f.endsWith('.jar') || f.endsWith('.pom')) && !f.endsWith('javadoc.jar') && !f.endsWith('sources.jar')
+            );
+
+            for (const file of files) {
+              const filePath = path.join(artifactDir, file);
+              const data = fs.readFileSync(filePath);
+
+              await github.rest.repos.uploadReleaseAsset({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: release.id,
+                name: file,
+                data: data
+              });
+              console.log(`Uploaded ${file}`);
+            }
