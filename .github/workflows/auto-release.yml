@@ -5,6 +5,12 @@ on:
     types: [closed]
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (e.g., 1.2.3). If not provided, reads from .bumpversion.cfg"
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -13,10 +19,11 @@ permissions:
 jobs:
   create-release:
     runs-on: ubuntu-latest
-    # Only run if PR was merged and came from a release branch
+    # Run if PR was merged from release branch OR manually triggered
     if: |
-      github.event.pull_request.merged == true &&
-      startsWith(github.event.pull_request.head.ref, 'release/')
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.merged == true &&
+       startsWith(github.event.pull_request.head.ref, 'release/'))
 
     steps:
       - name: Checkout code
@@ -29,8 +36,13 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Get version from .bumpversion.cfg - only the [bumpversion] section
-          VERSION=$(sed -n '/^\[bumpversion\]/,/^\[/p' .bumpversion.cfg | grep "^current_version" | cut -d'=' -f2 | tr -d ' ')
+          # Use manual input version if provided, otherwise read from .bumpversion.cfg
+          if [ -n "${{ inputs.version }}" ]; then
+            VERSION="${{ inputs.version }}"
+          else
+            # Get version from .bumpversion.cfg - only the [bumpversion] section
+            VERSION=$(sed -n '/^\[bumpversion\]/,/^\[/p' .bumpversion.cfg | grep "^current_version" | cut -d'=' -f2 | tr -d ' ')
+          fi
 
           # sanitize against characters that will break GITHUB_OUTPUT (angle brackets, CRs, newlines)
           SAFE_VERSION=$(printf '%s' "$VERSION" | tr -d '<>' | tr -d $'\r' | tr -d $'\n')
@@ -192,10 +204,4 @@ jobs:
         run: |
           echo "✅ Release v${{ steps.get_version.outputs.version }} created successfully!"
           echo "🔖 Tag: v${{ steps.get_version.outputs.version }}"
-          echo "📦 Packages and Docker images will be published by their respective workflows"
-
-      - name: Trigger Maven Publish
-        run: |
-          gh workflow run maven-publish.yml -r main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          echo "📦 Maven and Docker publish workflows will automatically attach artifacts to this release"

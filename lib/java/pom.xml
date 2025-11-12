@@ -16,12 +16,12 @@
         <repository>
             <id>github</id>
             <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/TruvetaPublic/OpenToken</url>
+            <url>https://maven.pkg.github.com/mattwise-42/OpenToken</url>
         </repository>
     </distributionManagement>
 
     <properties>
-        <revision>1.24.0</revision>
+        <revision>2.0.3</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>11</java.version>
         <maven.compiler.release>${java.version}</maven.compiler.release>
@@ -304,6 +304,9 @@
             <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <version>3.1.4</version>
+                <configuration>
+                    <updateReleaseInfo>true</updateReleaseInfo>
+                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-site-plugin</artifactId>
