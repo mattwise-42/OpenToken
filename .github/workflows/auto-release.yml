@@ -195,7 +195,11 @@ jobs:
           echo "📦 Packages and Docker images will be published by their respective workflows"
 
       - name: Trigger Maven Publish
+        if: steps.check_tag.outputs.exists == 'false' && steps.check_release.outputs.exists == 'false'
         run: |
-          gh workflow run maven-publish.yml -r main
+          gh workflow run maven-publish.yml \
+            --ref main \
+            -f release_id=${{ steps.create_release.outputs.release_id }} \
+            -f release_tag=${{ steps.get_version.outputs.tag }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -7,6 +7,15 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      release_id:
+        description: 'Release ID to attach artifacts to'
+        required: false
+        type: string
+      release_tag:
+        description: 'Release tag'
+        required: false
+        type: string
 
 jobs:
   build:
@@ -36,6 +45,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
       - name: Upload Maven artifacts to release
+        if: inputs.release_id != ''
         uses: actions/github-script@v7
         with:
           script: |
@@ -43,10 +53,10 @@ jobs:
             const path = require('path');
 
             const artifactDir = 'lib/java/target';
-            const release = context.payload.release;
+            const releaseId = '${{ inputs.release_id }}';
 
-            if (!release) {
-              console.log('No release found in payload, skipping artifact upload');
+            if (!releaseId) {
+              console.log('No release ID provided, skipping artifact upload');
               return;
             }
 
@@ -66,7 +76,7 @@ jobs:
               await github.rest.repos.uploadReleaseAsset({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                release_id: release.id,
+                release_id: releaseId,
                 name: file,
                 data: data
               });
