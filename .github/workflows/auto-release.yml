@@ -193,9 +193,3 @@ jobs:
           echo "✅ Release v${{ steps.get_version.outputs.version }} created successfully!"
           echo "🔖 Tag: v${{ steps.get_version.outputs.version }}"
           echo "📦 Packages and Docker images will be published by their respective workflows"
-
-      - name: Trigger Maven Publish
-        run: |
-          gh workflow run maven-publish.yml -r main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
