@@ -7,15 +7,6 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      release_id:
-        description: 'Release ID to attach artifacts to'
-        required: false
-        type: string
-      release_tag:
-        description: 'Release tag'
-        required: false
-        type: string
 
 jobs:
   build:
@@ -27,6 +18,41 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      
+      - name: Get version from .bumpversion.cfg
+        id: get_version
+        run: |
+          # Get version from .bumpversion.cfg
+          VERSION=$(sed -n '/^\[bumpversion\]/,/^\[/p' .bumpversion.cfg | grep "^current_version" | cut -d'=' -f2 | tr -d ' ')
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "tag=v${VERSION}" >> $GITHUB_OUTPUT
+          echo "Detected version: ${VERSION}"
+          echo "Detected tag: v${VERSION}"
+      
+      - name: Find matching release
+        id: find_release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tag = 'v${{ steps.get_version.outputs.version }}';
+            try {
+              const release = await github.rest.repos.getReleaseByTag({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag: tag
+              });
+              core.setOutput('release_id', release.data.id);
+              core.setOutput('found', 'true');
+              console.log(`Found release ${tag} with ID ${release.data.id}`);
+            } catch (error) {
+              if (error.status === 404) {
+                core.setOutput('found', 'false');
+                console.log(`No release found for tag ${tag}`);
+              } else {
+                throw error;
+              }
+            }
+      
       - name: Set up JDK 11
         uses: actions/setup-java@v4
         with:
@@ -45,7 +71,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
       - name: Upload Maven artifacts to release
-        if: inputs.release_id != ''
+        if: steps.find_release.outputs.found == 'true'
         uses: actions/github-script@v7
         with:
           script: |
@@ -53,10 +79,10 @@ jobs:
             const path = require('path');
 
             const artifactDir = 'lib/java/target';
-            const releaseId = '${{ inputs.release_id }}';
+            const releaseId = '${{ steps.find_release.outputs.release_id }}';
 
             if (!releaseId) {
-              console.log('No release ID provided, skipping artifact upload');
+              console.log('No release ID found, skipping artifact upload');
               return;
             }
 
@@ -80,5 +106,5 @@ jobs:
                 name: file,
                 data: data
               });
-              console.log(`Uploaded ${file}`);
+              console.log(`Uploaded ${file} to release ${{ steps.get_version.outputs.tag }}`);
             }
