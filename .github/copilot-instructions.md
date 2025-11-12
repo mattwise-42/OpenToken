@@ -29,6 +29,18 @@
 
 ## Development Workflows
 
+### Getting Started
+
+**All work must start from the `develop` branch**:
+
+```bash
+git checkout develop
+git pull origin develop
+git checkout -b dev/<github-username>/<feature-description>
+```
+
+When creating pull requests, **always target the `develop` branch as the base**, not `main`. The `main` branch is reserved for releases and should only receive changes through the automated release workflow.
+
 ### Build & Test
 
 ```bash
@@ -56,6 +68,8 @@ This updates `.bumpversion.cfg`, `pom.xml`, `setup.py`, `__init__.py`, `Dockerfi
 ### Branch Naming
 
 `dev/<github-username>/<feature-description>` (e.g., `dev/mattwise-42/additional-attributes`)
+
+**Important**: All work starts from the `develop` branch, not `main`. When creating pull requests, target the `develop` branch as the base, not `main`. The `develop` branch is the integration point for all feature work, and changes eventually flow to `main` through the release process.
 
 ## Project-Specific Conventions
 
