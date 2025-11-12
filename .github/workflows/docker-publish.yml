@@ -45,7 +45,7 @@ jobs:
           echo "TAG=v${VERSION}" >> $GITHUB_ENV
           echo "Detected version: ${VERSION}"
           echo "Detected tag: v${VERSION}"
-      
+
       - name: Find matching release
         id: find_release
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -144,9 +144,9 @@ jobs:
             const registry = '${{ env.REGISTRY }}';
             const fullImage = `${registry}/${{ github.repository }}:${version}`;
             const digest = '${{ steps.build-and-push.outputs.digest }}';
-            
+
             let releaseId;
-            
+
             // Get release ID from event or from find_release step
             if (context.payload.release) {
               releaseId = context.payload.release.id;
