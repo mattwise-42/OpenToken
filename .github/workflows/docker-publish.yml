@@ -5,7 +5,7 @@ on:
     branches: ["main", "develop"]
   release:
     types: [created, published, released]
-  # Added pull_request trigger - pull requests now trigger builds for validation
+  workflow_dispatch:
 
 env:
   # Use docker.io for Docker Hub if empty
