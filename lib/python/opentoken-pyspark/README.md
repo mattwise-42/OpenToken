@@ -24,7 +24,7 @@ cd lib/python
 pip install -e .
 
 # Then install the PySpark bridge
-cd ../python-pyspark
+cd ../opentoken-pyspark
 pip install -e .
 ```
 
