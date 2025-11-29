@@ -4,13 +4,13 @@ Copyright (c) Truveta. All rights reserved.
 
 import logging
 import uuid
-from collections import defaultdict
-from typing import Dict, List, Type, Any
+from typing import Dict, List, Type, Any, Set
 
 from opentoken.attributes.attribute import Attribute
 from opentoken.attributes.general.record_id_attribute import RecordIdAttribute
 from opentoken.io.person_attributes_reader import PersonAttributesReader
 from opentoken.io.person_attributes_writer import PersonAttributesWriter
+from opentoken.processor.token_constants import TokenConstants
 from opentoken.tokens.token_definition import TokenDefinition
 from opentoken.tokens.token_generator import TokenGenerator
 from opentoken.tokens.token_generator_result import TokenGeneratorResult
@@ -29,10 +29,6 @@ class PersonAttributesProcessor:
     to the output data source.
     """
 
-    TOKEN = "Token"
-    RULE_ID = "RuleId"
-    RECORD_ID = "RecordId"
-
     TOTAL_ROWS = "TotalRows"
     TOTAL_ROWS_WITH_INVALID_ATTRIBUTES = "TotalRowsWithInvalidAttributes"
     INVALID_ATTRIBUTES_BY_TYPE = "InvalidAttributesByType"
@@ -40,7 +36,6 @@ class PersonAttributesProcessor:
 
     def __init__(self):
         """Private constructor to prevent instantiation."""
-        pass
 
     @staticmethod
     def process(reader: PersonAttributesReader,
@@ -59,11 +54,12 @@ class PersonAttributesProcessor:
             metadata_map: Optional metadata map to update with processing statistics.
         """
         # TokenGenerator code
-        token_generator = TokenGenerator(TokenDefinition(), token_transformer_list)
+        token_definition = TokenDefinition()
+        token_generator = TokenGenerator.from_transformers(token_definition, token_transformer_list)
 
         row_counter = 0
-        invalid_attribute_count: Dict[str, int] = defaultdict(int)
-        blank_tokens_by_rule_count: Dict[str, int] = defaultdict(int)
+        invalid_attribute_count: Dict[str, int] = PersonAttributesProcessor._initialize_invalid_attribute_count(token_definition)
+        blank_tokens_by_rule_count: Dict[str, int] = PersonAttributesProcessor._initialize_blank_tokens_by_rule_count(token_definition)
 
         try:
             for row in reader:
@@ -93,15 +89,15 @@ class PersonAttributesProcessor:
 
         logger.info(f"Processed a total of {row_counter:,} records")
 
-        # Log invalid attribute statistics
-        for attribute_name, count in invalid_attribute_count.items():
+        # Log invalid attribute statistics in alphabetical order
+        for attribute_name, count in sorted(invalid_attribute_count.items()):
             logger.info(f"Total invalid Attribute count for [{attribute_name}]: {count:,}")
 
         total_invalid_records = sum(invalid_attribute_count.values())
         logger.info(f"Total number of records with invalid attributes: {total_invalid_records:,}")
 
-        # Log blank token statistics
-        for rule_id, count in blank_tokens_by_rule_count.items():
+        # Log blank token statistics in alphabetical order
+        for rule_id, count in sorted(blank_tokens_by_rule_count.items()):
             logger.info(f"Total blank tokens for rule [{rule_id}]: {count:,}")
 
         total_blank_tokens = sum(blank_tokens_by_rule_count.values())
@@ -111,8 +107,9 @@ class PersonAttributesProcessor:
         if metadata_map is not None:
             metadata_map[PersonAttributesProcessor.TOTAL_ROWS] = row_counter
             metadata_map[PersonAttributesProcessor.TOTAL_ROWS_WITH_INVALID_ATTRIBUTES] = total_invalid_records
-            metadata_map[PersonAttributesProcessor.INVALID_ATTRIBUTES_BY_TYPE] = dict(invalid_attribute_count)
-            metadata_map[PersonAttributesProcessor.BLANK_TOKENS_BY_RULE] = dict(blank_tokens_by_rule_count)
+            # Alphabetize attribute and token rule keys for deterministic metadata output
+            metadata_map[PersonAttributesProcessor.INVALID_ATTRIBUTES_BY_TYPE] = dict(sorted(invalid_attribute_count.items()))
+            metadata_map[PersonAttributesProcessor.BLANK_TOKENS_BY_RULE] = dict(sorted(blank_tokens_by_rule_count.items()))
 
     @staticmethod
     def _write_tokens(writer: PersonAttributesWriter,
@@ -138,9 +135,9 @@ class PersonAttributesProcessor:
 
         for token_id in token_ids:
             row_result = {
-                PersonAttributesProcessor.RULE_ID: token_id,
-                PersonAttributesProcessor.TOKEN: token_generator_result.tokens[token_id],
-                PersonAttributesProcessor.RECORD_ID: record_id
+                TokenConstants.RULE_ID: token_id,
+                TokenConstants.TOKEN: token_generator_result.tokens[token_id],
+                TokenConstants.RECORD_ID: record_id
             }
 
             try:
@@ -187,3 +184,53 @@ class PersonAttributesProcessor:
 
             for rule_id in token_generator_result.blank_tokens_by_rule:
                 blank_tokens_by_rule_count[rule_id] += 1
+
+    @staticmethod
+    def _initialize_invalid_attribute_count(token_definition: TokenDefinition) -> Dict[str, int]:
+        """
+        Initialize the invalid attribute count dictionary with attributes used in the token definition set to 0.
+        This ensures that all attribute types used in token generation appear in the metadata 
+        even in happy path scenarios.
+
+        Args:
+            token_definition: The token definition containing all token rules and their attribute expressions
+
+        Returns:
+            A dictionary with all attribute names used in token definitions initialized to 0
+        """
+        invalid_attribute_count: Dict[str, int] = {}
+        attribute_classes: Set[Type[Attribute]] = set()
+        
+        # Collect all unique attribute classes from all token definitions
+        for token_id in token_definition.get_token_identifiers():
+            expressions = token_definition.get_token_definition(token_id)
+            if expressions:
+                for expr in expressions:
+                    attribute_classes.add(expr.attribute_class)
+        
+        # Create instances and get names
+        for attr_class in attribute_classes:
+            try:
+                attribute = attr_class()
+                invalid_attribute_count[attribute.get_name()] = 0
+            except Exception as e:
+                logger.warning(f"Failed to instantiate attribute class: {attr_class.__name__}: {e}")
+        
+        return invalid_attribute_count
+
+    @staticmethod
+    def _initialize_blank_tokens_by_rule_count(token_definition: TokenDefinition) -> Dict[str, int]:
+        """
+        Initialize the blank tokens by rule count dictionary with all token identifiers set to 0.
+        This ensures that all token rules appear in the metadata even in happy path scenarios.
+
+        Args:
+            token_definition: The token definition containing all token identifiers
+
+        Returns:
+            A dictionary with all token identifiers initialized to 0
+        """
+        blank_tokens_by_rule_count: Dict[str, int] = {}
+        for token_id in token_definition.get_token_identifiers():
+            blank_tokens_by_rule_count[token_id] = 0
+        return blank_tokens_by_rule_count

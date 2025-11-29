@@ -82,13 +82,13 @@ The token generation rules above generate the following token signatures:
 
 The person attributes are validated before normalization. The validation rules are as follows:
 
-| Attribute Name         | Validation Rule                                                                                                                                                                                                                                                                                                                                        |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `FirstName`            | Cannot be a placeholder value (e.g., "Unknown", "Test", "NotAvailable", "Patient", "Sample", "Anonymous", "Missing", etc.). Must not be null or empty.                                                                                                                                                                                                 |
-| `LastName`             | Must be at least 2 characters long. For 2-character names, must contain at least one vowel or be "Ng". Cannot be a placeholder value (e.g., "Unknown", "Test", "NotAvailable", "Patient", "Sample", "Anonymous", "Missing", etc.). Must not be null or empty.                                                                                          |
-| `BirthDate`            | Must be after January 1, 1910. Cannot be in the future (after today's date). Must be in a valid date format.                                                                                                                                                                                                                                           |
+| Attribute Name         | Validation Rule                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `FirstName`            | Cannot be a placeholder value (e.g., "Unknown", "Test", "NotAvailable", "Patient", "Sample", "Anonymous", "Missing", etc.). Must not be null or empty.                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `LastName`             | Must be at least 2 characters long. For 2-character names, must contain at least one vowel or be "Ng". Cannot be a placeholder value (e.g., "Unknown", "Test", "NotAvailable", "Patient", "Sample", "Anonymous", "Missing", etc.). Must not be null or empty.                                                                                                                                                                                                                                                                                                                                                                    |
+| `BirthDate`            | Must be after January 1, 1910. Cannot be in the future (after today's date). Must be in a valid date format.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `PostalCode`           | Must be a valid US ZIP code (3, 4, 5, or 9 digits) or Canadian postal code (3, 4, 5, or 6 characters). **US ZIP codes:** `ddd` (ZIP-3, padded to `ddd00`), `dddd` (ZIP-4, padded to `dddd0`), `ddddd` or `ddddd-dddd`. **Canadian postal codes:** `AdA` (3-char, padded to `AdA 000`), `AdAd` or `AdA d` (4-char, padded to `AdA dA0`), `AdAdA` or `AdA dA` (5-char, padded to `AdA dA0`), or `AdA dAd` (full format). Invalid ZIP-3 codes: US `000`, `555`, `888`; Canadian `K1A`, `M7A`, `H0H`. Cannot be common placeholder values like `11111`, `12345`, `54321`, `98765` for US or `A1A 1A1`, `X0X 0X0` for Canadian codes. |
-| `SocialSecurityNumber` | Area cannot be `000`, `666` or `900-999`. Group cannot be `00`. Serial cannot be `0000`. Cannot be one of the following invalid sequences: `111-11-1111`, `222-22-2222`, `333-33-3333`, `444-44-4444`, `555-55-5555`, `777-77-7777`, `888-88-8888`.                                                                                                    |
+| `SocialSecurityNumber` | Area cannot be `000`, `666` or `900-999`. Group cannot be `00`. Serial cannot be `0000`. Cannot be one of the following invalid sequences: `111-11-1111`, `222-22-2222`, `333-33-3333`, `444-44-4444`, `555-55-5555`, `777-77-7777`, `888-88-8888`.                                                                                                                                                                                                                                                                                                                                                                              |
 
 ### Normalization of Person Attributes  <!-- omit in toc -->
 
@@ -109,15 +109,15 @@ All attribute values get normalized as part of their processing after validation
 - Removes non-alphabetic characters (e.g., "O'Keefe" → "OKeefe")
 - Normalizes diacritics (e.g., "García" → "Garcia")
 
-| Attribute Name           | Normalized Format                                                                                            |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `record-id`              | Any unique string identifier (optional - auto-generated UUID if not provided)                                |
-| `first-name`             | Any string (after normalization as described above)                                                          |
-| `last-name`              | Any string (after normalization as described above)                                                          |
+| Attribute Name           | Normalized Format                                                                                                                                                                                                                                                                                                                       |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `record-id`              | Any unique string identifier (optional - auto-generated UUID if not provided)                                                                                                                                                                                                                                                           |
+| `first-name`             | Any string (after normalization as described above)                                                                                                                                                                                                                                                                                     |
+| `last-name`              | Any string (after normalization as described above)                                                                                                                                                                                                                                                                                     |
 | `postal-code`            | US: `ddddd` where `d` is a numeric digit (0-9). Canadian: `AdA dAd` where `A` is a letter and `d` is a digit. Partial postal codes are automatically padded during normalization: US ZIP-3 (`ddd` → `ddd00`), ZIP-4 (`dddd` → `dddd0`); Canadian 3-char (`AdA` → `AdA 000`), 4-char (`AdAd` → `AdA dA0`), 5-char (`AdAdA` → `AdA dA0`). |
-| `sex`                    | `Male\|Female`                                                                                               |
-| `birth-date`             | `YYYY-MM-DD` where `MM` is (01-12), `DD` is (01-31)                                                          |
-| `social-security-number` | `ddddddddd` where `d` is a numeric digit (0-9) |
+| `sex`                    | `Male\|Female`                                                                                                                                                                                                                                                                                                                          |
+| `birth-date`             | `YYYY-MM-DD` where `MM` is (01-12), `DD` is (01-31)                                                                                                                                                                                                                                                                                     |
+| `social-security-number` | `ddddddddd` where `d` is a numeric digit (0-9)                                                                                                                                                                                                                                                                                          |
 
 ### How Token Matching Works  <!-- omit in toc -->
 
@@ -147,6 +147,12 @@ If tokens are generated for persons from multiple data sources, person matching 
 
 ![open-token-system](./docs/images/open-token-system.jpg)
 
+### PySpark Bridge <!-- omit in toc -->
+
+For large-scale, distributed token generation and dataset overlap analysis, use the PySpark bridge library located at lib/python/opentoken-pyspark. It provides a `Spark`-friendly processor and helper utilities.
+
+Getting started examples are available in the notebooks: lib/python/opentoken-pyspark/notebooks/ (e.g., Custom_Token_Definition_Guide.ipynb, Dataset_Overlap_Analysis_Guide.ipynb).
+
 ## Usage
 
 ### Arguments  <!-- omit in toc -->
@@ -163,24 +169,33 @@ The driver accepts multiple command line arguments:
 
 - `-h | --hashingsecret`: This argument is used to specify the hashing secret for the `HMAC-SHA256` digest. The generated tokens are hashed using this digest.
 
-- `-e | --encryptionkey`: This argument is used to specify the encryption key for the `AES-256` symmetric encryption. The generated tokens are encrypted using this key.
+- `-e | --encryptionkey`: This argument is used to specify the encryption key for the `AES-256` symmetric encryption. The generated tokens are encrypted using this key. Required unless using `--hash-only` mode.
+
+- `-d | --decrypt`: Optional. When provided, the tool operates in decryption mode. It decrypts tokens from a previously encrypted OpenToken output file. In decryption mode, only the encryption key (`-e`) is required. The input file can be either CSV or Parquet format containing encrypted tokens with columns: `RuleId`, `Token`, and `RecordId`.
+
+- `--hash-only`: Optional. When provided, the tool operates in hash-only mode. It generates tokens using HMAC-SHA256 hashing only, skipping the AES encryption step. In hash-only mode, only the hashing secret (`-h`) is required; the encryption key (`-e`) is not needed. This mode is useful for token matching scenarios where encryption is not necessary.
+
+- `-d | --decrypt`: Optional. When provided, the tool operates in decryption mode. It decrypts tokens from a previously encrypted OpenToken output file. In decryption mode, only the encryption key (`-e`) is required. The input file can be either CSV or Parquet format containing encrypted tokens with columns: `RuleId`, `Token`, and `RecordId`.
 
 The encryption logic is: 
 > $Base64(AES-Encrypt(HMAC-SHA256(Hex(Sha256(token-signature)))))$
+
+The hash-only logic is:
+> $Base64(HMAC-SHA256(Hex(Sha256(token-signature))))$
 
 ### Accepted input  <!-- omit in toc -->
 
 The input file (in csv format) must contain at least the following columns and values (one each):
 
-| Accepted Column Names                              | Required | Accepted Values                                                                                                       |
-| -------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
-| RecordId, Id                                       | Optional | Any unique string identifier. If not provided, a unique UUID will be automatically generated for each row.           |
-| FirstName, GivenName                               | Required | Any string value                                                                                                      |
-| LastName, Surname                                  | Required | Any string value                                                                                                      |
-| PostalCode, ZipCode, ZIP3, ZIP4, ZIP5                    | Required | US: 3 (ZIP-3), 4, 5, or 9 digit ZIP code `ddd`, `ddddd` or `ddddd-dddd`. Canadian: 3 (ZIP-3) or 6 character postal code `AdA` or `AdAdAd` (with or without space). ZIP-3 codes are automatically padded to full length. |
-| Sex, Gender                                        | Required | `Male`, `M`, `Female`, `F`                                                                                            |
-| BirthDate, DateOfBirth                             | Required | Dates in either format: `yyyy/MM/dd`, `MM/dd/yyyy`, `MM-dd-yyyy`, `dd.MM.yyyy`                                        |
-| SocialSecurityNumber, NationalIdentificationNumber | Required | 9 digit number, with or without dashes, e.g. `ddd-dd-dddd`                                                            |
+| Accepted Column Names                              | Required | Accepted Values                                                                                                                                                                                                         |
+| -------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RecordId, Id                                       | Optional | Any unique string identifier. If not provided, a unique UUID will be automatically generated for each row.                                                                                                              |
+| FirstName, GivenName                               | Required | Any string value                                                                                                                                                                                                        |
+| LastName, Surname                                  | Required | Any string value                                                                                                                                                                                                        |
+| PostalCode, ZipCode, ZIP3, ZIP4, ZIP5              | Required | US: 3 (ZIP-3), 4, 5, or 9 digit ZIP code `ddd`, `ddddd` or `ddddd-dddd`. Canadian: 3 (ZIP-3) or 6 character postal code `AdA` or `AdAdAd` (with or without space). ZIP-3 codes are automatically padded to full length. |
+| Sex, Gender                                        | Required | `Male`, `M`, `Female`, `F`                                                                                                                                                                                              |
+| BirthDate, DateOfBirth                             | Required | Dates in either format: `yyyy/MM/dd`, `MM/dd/yyyy`, `MM-dd-yyyy`, `dd.MM.yyyy`                                                                                                                                          |
+| SocialSecurityNumber, NationalIdentificationNumber | Required | 9 digit number, with or without dashes, e.g. `ddd-dd-dddd`                                                                                                                                                              |
 
 **Note 1:** RecordId is optional. When not provided in the input file, the system automatically generates a unique UUID for each record in the output. Auto-generated UUIDs are suitable for initial overlap analysis, but for linkage of actual data records, providing real RecordIds from your source data is recommended.
 
@@ -209,17 +224,19 @@ For complete details about all metadata fields, examples, and security considera
 
 ## Quick Start
 
-### Java  <!-- omit in toc -->
+### Token Generation (Encryption Mode)  <!-- omit in toc -->
+
+#### Java  <!-- omit in toc -->
 
 ```shell
 cd lib/java/opentoken
-mvn clean install
+mvn clean install -DskipTests
 java -jar target/opentoken-*.jar \
-  -i ../../../resources/sample.csv -t csv -o target/output.csv \
+  -i ../../../resources/sample.csv -t csv -o ../../../resources/output.csv \
   -h "HashingKey" -e "Secret-Encryption-Key-Goes-Here."
 ```
 
-### Python  <!-- omit in toc -->
+#### Python  <!-- omit in toc -->
 
 ```shell
 cd lib/python/opentoken
@@ -230,6 +247,58 @@ PYTHONPATH=src/main python src/main/opentoken/main.py \
   -h "HashingKey" -e "Secret-Encryption-Key-Goes-Here."
 ```
 
+### Token Decryption  <!-- omit in toc -->
+
+To decrypt previously encrypted tokens, use the `-d` or `--decrypt` flag. The decryption mode requires only the encryption key that was used to encrypt the tokens.
+
+#### Java  <!-- omit in toc -->
+
+```shell
+cd lib/java/opentoken
+mvn clean install -DskipTests
+java -jar target/opentoken-*.jar -d \
+  -i ../../../resources/output.csv -t csv -o ../../../resources/hashed-output.csv \
+  -e "Secret-Encryption-Key-Goes-Here."
+```
+
+#### Python  <!-- omit in toc -->
+
+```shell
+cd lib/python/opentoken
+python -m venv .venv && source .venv/bin/activate
+python -m opentoken.main -d \
+  -i ../../../resources/output.csv -t csv -o ../../../resources/hashed-output.csv \
+  -e "Secret-Encryption-Key-Goes-Here."
+```
+
+**Note:** Decryption mode supports both CSV and Parquet input/output formats. The decrypted output will contain the HMAC-SHA256 hashed tokens (base64 encoded) before AES encryption. Cross-language compatibility is supported - tokens encrypted by Java can be decrypted by Python and vice versa.
+
+### Token Generation (Hash-Only Mode)  <!-- omit in toc -->
+
+To generate tokens with HMAC-SHA256 hashing only (skipping the AES encryption step), use the `--hash-only` flag. This is useful for token matching scenarios where encryption is not necessary. Only the hashing secret is required in this mode.
+
+#### Java  <!-- omit in toc -->
+
+```shell
+cd lib/java/opentoken
+mvn clean install -DskipTests
+java -jar target/opentoken-*.jar --hash-only \
+  -i ../../../resources/sample.csv -t csv -o ../../../resources/hashed-output.csv \
+  -h "HashingKey"
+```
+
+#### Python  <!-- omit in toc -->
+
+```shell
+cd lib/python/opentoken
+python -m venv .venv && source .venv/bin/activate
+PYTHONPATH=src/main python src/main/opentoken/main.py --hash-only \
+  -i ../../../resources/sample.csv -t csv -o ../../../resources/hashed-output.csv \
+  -h "HashingKey"
+```
+
+**Note:** Hash-only mode supports both CSV and Parquet input/output formats. The output will contain HMAC-SHA256 hashed tokens (base64 encoded) without AES encryption. Cross-language compatibility is guaranteed - tokens generated by Java will be identical to those generated by Python when using the same hashing secret.
+
 ### Docker  <!-- omit in toc -->
 
 #### Using Convenience Scripts (Recommended)
@@ -237,24 +306,28 @@ PYTHONPATH=src/main python src/main/opentoken/main.py \
 Use the provided scripts to automatically build and run OpenToken via Docker:
 
 **Bash (Linux/Mac):**
+
 ```bash
 ./run-opentoken.sh -i /path/to/input.csv -o /path/to/output.csv -t csv \
   -h "HashingKey" -e "Secret-Encryption-Key-Goes-Here."
 ```
 
 **PowerShell (Windows):**
+
 ```powershell
 .\run-opentoken.ps1 -i D:\Data\input.csv -o D:\Data\output.csv -FileType csv `
   -h "HashingKey" -e "Secret-Encryption-Key-Goes-Here."
 ```
 
 These scripts automatically:
+
 - Build the Docker image (if needed)
 - Mount input/output directories
 - Handle path conversions for your OS
 - Support both CSV and Parquet formats
 
 Run with `--help` (Bash) or `-Help` (PowerShell) for all options, including:
+
 - `-t` or `-FileType` for format selection (csv/parquet)
 - `-s` or `-SkipBuild` to skip rebuilding the image
 - `-v` or `-Verbose` for detailed output
