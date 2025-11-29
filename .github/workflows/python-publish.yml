@@ -11,6 +11,15 @@ on:
     workflows: ["Create Release on Merge"]
     types: [completed]
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to attach artifacts to (e.g., v1.11.0)"
+        required: false
+        type: string
+      version:
+        description: "Release version (e.g., 1.11.0). If provided, used for filenames"
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -30,8 +39,9 @@ jobs:
       packages: write
 
     env:
-      VERSION: ${{ needs.release-info.outputs['version'] }}
-      TAG: ${{ needs.release-info.outputs['tag'] }}
+      # Prefer workflow_dispatch inputs when present; otherwise, fall back to release-context outputs
+      VERSION: ${{ github.event.inputs.version || needs.release-info.outputs['version'] }}
+      TAG: ${{ github.event.inputs.tag || needs.release-info.outputs['tag'] }}
       RELEASE_FOUND: ${{ needs.release-info.outputs['release-found'] }}
       RELEASE_ID: ${{ needs.release-info.outputs['release-id'] }}
 
@@ -71,7 +81,6 @@ jobs:
             lib/python/opentoken-pyspark/dist/*.tar.gz
 
       - name: Attach distributions to release
-        if: env.RELEASE_FOUND == 'true'
         uses: actions/github-script@v7
         with:
           script: |
